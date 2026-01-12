@@ -136,6 +136,7 @@ kfp-serve: kfp-build ## Serve wheel via HTTP for Kind/Docker clusters
 kfp-compile: ## Compile notebook with local wheel (usage: make kfp-compile NB=path/to/notebook.ipynb)
 	@test -n "$(NB)" || { echo "$(YELLOW)Usage: make kfp-compile NB=path/to/notebook.ipynb$(NC)"; exit 1; }
 	@echo "$(YELLOW)Make sure 'make kfp-serve' is running in another terminal$(NC)"
+	SETUPTOOLS_SCM_PRETEND_VERSION=$(KFP_DEV_VERSION) \
 	KALE_PIP_INDEX_URLS="http://host.docker.internal:$(KFP_PORT),https://pypi.org/simple" \
 	KALE_PIP_TRUSTED_HOSTS="host.docker.internal" \
 	$(UV) run kale --nb $(NB)
@@ -144,6 +145,7 @@ kfp-run: ## Compile and run on KFP with local wheel (usage: make kfp-run NB=... 
 	@test -n "$(NB)" || { echo "$(YELLOW)Usage: make kfp-run NB=path/to/notebook.ipynb KFP_HOST=http://localhost:8080$(NC)"; exit 1; }
 	@test -n "$(KFP_HOST)" || { echo "$(YELLOW)Error: KFP_HOST not set$(NC)"; exit 1; }
 	@echo "$(YELLOW)Make sure 'make kfp-serve' is running in another terminal$(NC)"
+	SETUPTOOLS_SCM_PRETEND_VERSION=$(KFP_DEV_VERSION) \
 	KALE_PIP_INDEX_URLS="http://host.docker.internal:$(KFP_PORT),https://pypi.org/simple" \
 	KALE_PIP_TRUSTED_HOSTS="host.docker.internal" \
 	$(UV) run kale --nb $(NB) --kfp_host $(KFP_HOST) --run_pipeline
@@ -180,6 +182,7 @@ jupyter: ## Start JupyterLab
 
 jupyter-kfp: ## Start JupyterLab with KFP dev environment (run kfp-serve first!)
 	@echo "$(YELLOW)Make sure 'make kfp-serve' is running in another terminal$(NC)"
+	SETUPTOOLS_SCM_PRETEND_VERSION=$(KFP_DEV_VERSION) \
 	KALE_PIP_INDEX_URLS="http://host.docker.internal:$(KFP_PORT),https://pypi.org/simple" \
 	KALE_PIP_TRUSTED_HOSTS="host.docker.internal" \
 	$(UV) run jupyter lab
