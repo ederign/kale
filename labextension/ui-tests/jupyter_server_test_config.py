@@ -8,5 +8,8 @@ from jupyterlab.galata import configure_jupyter_server
 
 configure_jupyter_server(c)
 
+# Use port 8889 to avoid conflicts with running JupyterLab instances
+c.ServerApp.port = 8889
+
 # Uncomment to set server log level to debug level
 # c.ServerApp.log_level = "DEBUG"

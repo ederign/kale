@@ -1,6 +1,6 @@
 {
     "name": "kubeflow-kale-labextension",
-    "version": "0.7.1",
+    "version": "2.0.0-alpha.1",
     "description": "Convert Notebooks to Kubeflow pipelines with Kale",
     "keywords": [
         "jupyter",
@@ -66,6 +66,7 @@
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
         "@jupyterlab/builder": "^4.4.6",
+        "@jupyterlab/testutils": "^4.4.0",
         "@mui/icons-material": "^7.3.1",
         "@mui/material": "^7.3.1",
         "@types/jest": "^29.2.0",
