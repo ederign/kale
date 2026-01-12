@@ -41,11 +41,10 @@ DEV_VERSION ?= 2.0.0a1
 dev: check-uv ## Set up development environment
 	@echo "$(BLUE)Setting up Kale development environment...$(NC)"
 	$(UV) sync --all-packages --all-extras
-	@echo "$(BLUE)Installing backend with version $(DEV_VERSION)...$(NC)"
-	cd backend && SETUPTOOLS_SCM_PRETEND_VERSION=$(DEV_VERSION) $(UV) pip install -e . --reinstall
 	cd labextension && $(JLPM) install
 	cd labextension && $(JLPM) build
 	$(UV) run jupyter labextension develop ./labextension --overwrite
+	@command -v pre-commit >/dev/null 2>&1 && pre-commit install || echo "$(YELLOW)Tip: Install pre-commit for git hooks (pip install pre-commit)$(NC)"
 	@echo "$(GREEN)Setup complete! Run 'make jupyter' to start JupyterLab$(NC)"
 
 install: dev ## Alias for dev
@@ -81,9 +80,10 @@ test-e2e: ## Run Playwright e2e tests (experimental)
 
 lint: lint-backend lint-labextension ## Run all linters
 
-lint-backend: ## Lint backend code (flake8)
+lint-backend: ## Lint backend code (ruff)
 	@echo "$(BLUE)Linting backend...$(NC)"
-	$(UV) run flake8 backend --count --show-source --statistics
+	$(UV) run ruff check backend
+	$(UV) run ruff format --check backend
 
 lint-labextension: ## Lint labextension code (eslint + prettier)
 	@echo "$(BLUE)Linting labextension...$(NC)"

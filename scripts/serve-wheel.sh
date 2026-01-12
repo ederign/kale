@@ -6,7 +6,7 @@ set -euo pipefail
 
 WHEEL_DIR="${1:-.kfp-wheels}"
 PORT="${2:-8765}"
-KFP_DEV_VERSION="${3:-2.0.0a1.dev0}"
+KFP_DEV_VERSION="${3:-2.0.0a1}"
 
 echo "Building backend wheel with version $KFP_DEV_VERSION..."
 (cd backend && SETUPTOOLS_SCM_PRETEND_VERSION="$KFP_DEV_VERSION" uv build)

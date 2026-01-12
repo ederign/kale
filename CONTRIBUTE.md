@@ -36,7 +36,7 @@ Run `make help` to see all available commands.
 | `make test-e2e-install` | Install Playwright browsers (run once) |
 | `make test-e2e` | Run Playwright e2e tests (experimental) |
 | `make lint` | Run all linters |
-| `make lint-backend` | Lint backend code (flake8) |
+| `make lint-backend` | Lint backend code (ruff) |
 | `make lint-labextension` | Lint labextension code (eslint + prettier) |
 | `make format-labextension` | Format labextension code |
 | `make build-backend` | Build backend wheel |

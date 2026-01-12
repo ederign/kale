@@ -49,8 +49,7 @@ dev = [
   "pytest-clarity",
   "testfixtures",
   "pytest-cov",
-  "flake8",
-  "flake8-docstrings",
+  "ruff",
 ]
 
 # autodiscover packages
