@@ -40,10 +40,17 @@ DEV_VERSION ?= 2.0.0a1
 
 dev: check-uv ## Set up development environment
 	@echo "$(BLUE)Setting up Kale development environment...$(NC)"
-	$(UV) sync --all-packages --all-extras
+	@# Step 1: Install backend first to get jlpm available
+	$(UV) sync --package kubeflow-kale --all-extras
+	@# Step 2: Build labextension (requires jlpm from step 1)
 	cd labextension && $(JLPM) install
+	@# Clean tsbuildinfo cache before build (fixes incremental build issues after make clean)
+	cd labextension && $(JLPM) clean:lib
 	cd labextension && $(JLPM) build
-	$(UV) run jupyter labextension develop ./labextension --overwrite
+	@# Step 3: Now sync all packages (labextension editable install needs lib/ to exist)
+	$(UV) sync --all-packages --all-extras
+	@# Step 4: Link extension for development (must run from labextension directory)
+	cd labextension && $(UV) run jupyter labextension develop . --overwrite
 	@command -v pre-commit >/dev/null 2>&1 && pre-commit install || echo "$(YELLOW)Tip: Install pre-commit for git hooks (pip install pre-commit)$(NC)"
 	@echo "$(GREEN)Setup complete! Run 'make jupyter' to start JupyterLab$(NC)"
 
