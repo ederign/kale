@@ -133,11 +133,6 @@ kfp-build: ## Build wheel for KFP cluster testing (fixed version for reproducibi
 
 kfp-serve: kfp-build ## Serve wheel via HTTP for Kind/Docker clusters
 	@echo "$(BLUE)Starting wheel server on port $(KFP_PORT)...$(NC)"
-	@echo ""
-	@echo "$(YELLOW)Set these environment variables before compiling:$(NC)"
-	@echo "  export KALE_PIP_INDEX_URLS=\"http://host.docker.internal:$(KFP_PORT),https://pypi.org/simple\""
-	@echo "  export KALE_PIP_TRUSTED_HOSTS=\"host.docker.internal\""
-	@echo ""
 	cd $(KFP_WHEEL_DIR) && python3 -m http.server $(KFP_PORT)
 
 kfp-compile: ## Compile notebook with local wheel (usage: make kfp-compile NB=path/to/notebook.ipynb)
@@ -190,8 +185,9 @@ jupyter: ## Start JupyterLab
 jupyter-kfp: ## Start JupyterLab with KFP dev environment (run kfp-serve first!)
 	@echo "$(YELLOW)Make sure 'make kfp-serve' is running in another terminal$(NC)"
 	SETUPTOOLS_SCM_PRETEND_VERSION=$(KFP_DEV_VERSION) \
-	KALE_PIP_INDEX_URLS="http://host.docker.internal:$(KFP_PORT),https://pypi.org/simple" \
-	KALE_PIP_TRUSTED_HOSTS="host.docker.internal" \
+	KFP_HOST_ADDR=${KFP_HOST_ADDR:=host.docker.internal} \
+	KALE_PIP_INDEX_URLS="http://${KFP_HOST_ADDR}:$(KFP_PORT),https://pypi.org/simple" \
+	KALE_PIP_TRUSTED_HOSTS="${KFP_HOST_ADDR}" \
 	$(UV) run jupyter lab
 
 watch-labextension: ## Watch labextension for changes (run in separate terminal)

@@ -212,6 +212,15 @@ The `jupyter-kfp` target sets the required environment variables automatically.
 When you click "Compile and Run" in the Kale panel, the generated pipeline
 will include your local wheel URL and trusted host configuration.
 
+> NOTE:
+>
+> If you are not using `kind` or on Linux you must set `KFP_HOST_ADDR` before running `make jupyter-kfp`.
+>
+> For example, `minikube` users should use `KFP_HOST_ADDR=host.minikube.internal`
+>
+> To let KFP access localhost you may also need to disable the firewall:
+> `sudo systemctl stop firewalld`
+
 ### With KFP Host (Direct Submission)
 
 If you have a KFP instance running and want to submit directly:
