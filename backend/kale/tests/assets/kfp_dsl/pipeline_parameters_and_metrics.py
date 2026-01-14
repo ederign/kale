@@ -4,7 +4,7 @@ from kfp.dsl import Input, Output, Dataset, HTML, Metrics, ClassificationMetrics
 
 
 @kfp_dsl.component(
-    base_image='python:3.10',
+    base_image='python:3.12',
     packages_to_install=['kfp>=2.0.0', 'kubeflow-kale', 'numpy'],
     pip_index_urls=['https://pypi.org/simple'],
     pip_trusted_hosts=[]
@@ -80,7 +80,7 @@ def create_matrix_step(create_matrix_html_report: Output[HTML], rnd_matrix_artif
 
 
 @kfp_dsl.component(
-    base_image='python:3.10',
+    base_image='python:3.12',
     packages_to_install=['kfp>=2.0.0', 'kubeflow-kale', 'numpy'],
     pip_index_urls=['https://pypi.org/simple'],
     pip_trusted_hosts=[]
