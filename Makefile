@@ -139,8 +139,9 @@ kfp-compile: ## Compile notebook with local wheel (usage: make kfp-compile NB=pa
 	@test -n "$(NB)" || { echo "$(YELLOW)Usage: make kfp-compile NB=path/to/notebook.ipynb$(NC)"; exit 1; }
 	@echo "$(YELLOW)Make sure 'make kfp-serve' is running in another terminal$(NC)"
 	SETUPTOOLS_SCM_PRETEND_VERSION=$(KFP_DEV_VERSION) \
-	KALE_PIP_INDEX_URLS="http://host.docker.internal:$(KFP_PORT),https://pypi.org/simple" \
-	KALE_PIP_TRUSTED_HOSTS="host.docker.internal" \
+	KFP_HOST_ADDR=${KFP_HOST_ADDR:=host.docker.internal} \
+	KALE_PIP_INDEX_URLS="http://${KFP_HOST_ADDR}:$(KFP_PORT),https://pypi.org/simple" \
+	KALE_PIP_TRUSTED_HOSTS="${KFP_HOST_ADDR}" \
 	$(UV) run kale --nb $(NB)
 
 kfp-run: ## Compile and run on KFP with local wheel (usage: make kfp-run NB=... KFP_HOST=...)
@@ -148,8 +149,9 @@ kfp-run: ## Compile and run on KFP with local wheel (usage: make kfp-run NB=... 
 	@test -n "$(KFP_HOST)" || { echo "$(YELLOW)Error: KFP_HOST not set$(NC)"; exit 1; }
 	@echo "$(YELLOW)Make sure 'make kfp-serve' is running in another terminal$(NC)"
 	SETUPTOOLS_SCM_PRETEND_VERSION=$(KFP_DEV_VERSION) \
-	KALE_PIP_INDEX_URLS="http://host.docker.internal:$(KFP_PORT),https://pypi.org/simple" \
-	KALE_PIP_TRUSTED_HOSTS="host.docker.internal" \
+	KFP_HOST_ADDR=${KFP_HOST_ADDR:=host.docker.internal} \
+	KALE_PIP_INDEX_URLS="http://${KFP_HOST_ADDR}:$(KFP_PORT),https://pypi.org/simple" \
+	KALE_PIP_TRUSTED_HOSTS="${KFP_HOST_ADDR}" \
 	$(UV) run kale --nb $(NB) --kfp_host $(KFP_HOST) --run_pipeline
 
 ##@ Cleanup
