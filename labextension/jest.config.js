@@ -24,5 +24,6 @@ module.exports = {
   ],
   coverageReporters: ['lcov', 'text'],
   testRegex: 'src/.*/.*.spec.ts[x]?$',
+  testPathIgnorePatterns: ['/node_modules/', '/ui-tests/'],
   transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
 };

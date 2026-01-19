@@ -8,7 +8,7 @@ name = "kubeflow-kale"
 dynamic = ["version"]
 description = "Convert JupyterNotebooks to Kubeflow Pipelines deployments"
 readme = "README.md"
-requires-python = ">=3.10.0"
+requires-python = ">=3.12"
 license = { text = "Apache License Version 2.0" }
 
 dependencies = [
@@ -49,8 +49,7 @@ dev = [
   "pytest-clarity",
   "testfixtures",
   "pytest-cov",
-  "flake8",
-  "flake8-docstrings",
+  "ruff",
 ]
 
 # autodiscover packages
@@ -62,5 +61,5 @@ include = ["kale*"]
 [tool.setuptools_scm]
 # Tag form: v1.0.0 -> 1.0.0 ; commit after tag -> 1.0.0.devN+gHASH
 local_scheme = "node-and-date"
-fallback_version = "0+unknown"
+fallback_version = "2.0.0a1"
 root = ".."

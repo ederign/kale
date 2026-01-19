@@ -1,0 +1,29 @@
+# ABOUTME: Pre-commit hook configuration for Kale development.
+# ABOUTME: Ensures lockfile sync, file hygiene, and Python linting.
+
+repos:
+  # Keep uv.lock in sync with pyproject.toml changes
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.5.0
+    hooks:
+      - id: uv-lock
+        name: Check uv.lock is up to date
+
+  # General file hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  # Python linting (ruff is faster than flake8)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+# Note: JS/TS linting handled by existing Husky setup in labextension/
