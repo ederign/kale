@@ -10,7 +10,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  pytest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +30,12 @@ jobs:
 
       - name: Run backend tests
         run: make test-backend
+
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for flake8
+        run: echo "TODO - flake8 linting to be enabled in a follow-up PR"
 
   # TODO: Fix linting in a later PR - currently broken
   # lint:

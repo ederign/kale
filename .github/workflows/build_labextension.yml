@@ -39,6 +39,12 @@ jobs:
   #     - name: Lint labextension
   #       run: make lint-labextension
 
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for prettier
+        run: echo "TODO - prettier linting to be enabled in a follow-up PR"
+
   build:
     runs-on: ubuntu-latest
     steps:
