@@ -20,6 +20,7 @@ jobs:
       - name: Check license headers
         run: |
           ~/go/bin/addlicense -check -f .license-header.txt \
+            -ignore "**/tests/assets/**" \
             -ignore "**/node_modules/**" \
             -ignore "**/.venv/**" \
             -ignore "**/dist/**" \
