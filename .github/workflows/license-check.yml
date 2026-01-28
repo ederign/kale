@@ -13,11 +13,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install addlicense
-        run: go install github.com/google/addlicense@latest
+        run: |
+          go install github.com/google/addlicense@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
 
       - name: Check license headers
         run: |
-          addlicense -check -f .license-header.txt \
+          ~/go/bin/addlicense -check -f .license-header.txt \
             -ignore "**/node_modules/**" \
             -ignore "**/.venv/**" \
             -ignore "**/dist/**" \
