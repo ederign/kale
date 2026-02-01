@@ -53,7 +53,11 @@ dev: check-uv ## Set up development environment
 	cd labextension && SETUPTOOLS_SCM_PRETEND_VERSION=$(DEV_VERSION) $(UV) run jupyter labextension develop . --overwrite
 	@# Step 5: Set up Husky git hooks for labextension
 	cd labextension && $(JLPM) prepare
-	@command -v pre-commit >/dev/null 2>&1 && pre-commit install || printf "$(YELLOW)Tip: Install pre-commit for git hooks (pip install pre-commit)\n$(NC)"
+	@# Step 6: Set up pre-commit hooks for Python
+	@$(UV) run pre-commit install 2>/dev/null || { \
+		printf "$(YELLOW)Note: pre-commit hooks not installed (core.hooksPath is set globally).\n$(NC)"; \
+		printf "$(YELLOW)To enable pre-commit hooks, run: git config --unset core.hooksPath\n$(NC)"; \
+	}
 	@printf "$(GREEN)Setup complete! Run 'make jupyter' to start JupyterLab\n$(NC)"
 
 install: dev ## Alias for dev
