@@ -21,7 +21,7 @@ import { Kernel } from '@jupyterlab/services';
 import { ExperimentInput } from '../components/ExperimentInput';
 import {
   DeployProgressState,
-  DeploysProgress
+  DeploysProgress,
 } from './deploys-progress/DeploysProgress';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -41,7 +41,7 @@ export interface IExperiment {
 
 export const NEW_EXPERIMENT: IExperiment = {
   name: '+ New Experiment',
-  id: 'new'
+  id: 'new',
 };
 
 interface IProps {
@@ -85,7 +85,7 @@ export const DefaultState: IState = {
     pipeline_name: '',
     pipeline_description: '',
     base_image: '',
-    steps_defaults: []
+    steps_defaults: [],
   },
   runDeployment: false,
   deploymentType: 'compile',
@@ -95,7 +95,7 @@ export const DefaultState: IState = {
   deploys: {},
   isEnabled: false,
   namespace: '',
-  kfpUiHost: ''
+  kfpUiHost: '',
 };
 
 let deployIndex = 0;
@@ -125,23 +125,23 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
       metadata: {
         ...prevState.metadata,
         experiment: experiment,
-        experiment_name: experiment.name
-      }
+        experiment_name: experiment.name,
+      },
     }));
   updatePipelineName = (name: string) =>
     this.setState(prevState => ({
-      metadata: { ...prevState.metadata, pipeline_name: name }
+      metadata: { ...prevState.metadata, pipeline_name: name },
     }));
   updatePipelineDescription = (desc: string) =>
     this.setState(prevState => ({
-      metadata: { ...prevState.metadata, pipeline_description: desc }
+      metadata: { ...prevState.metadata, pipeline_description: desc },
     }));
   updateDockerImage = (name: string) =>
     this.setState(prevState => ({
       metadata: {
         ...prevState.metadata,
-        base_image: name
-      }
+        base_image: name,
+      },
     }));
 
   activateRunDeployState = (type: string) => {
@@ -153,14 +153,14 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
 
   changeDeployDebugMessage = () =>
     this.setState(prevState => ({
-      deployDebugMessage: !prevState.deployDebugMessage
+      deployDebugMessage: !prevState.deployDebugMessage,
     }));
 
   // restore state to default values
   resetState = () =>
     this.setState(prevState => ({
       ...DefaultState,
-      isEnabled: prevState.isEnabled
+      isEnabled: prevState.isEnabled,
     }));
 
   componentDidMount = () => {
@@ -174,7 +174,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
 
   componentDidUpdate = (
     prevProps: Readonly<IProps>,
-    prevState: Readonly<IState>
+    prevState: Readonly<IState>,
   ) => {
     // fast comparison of Metadata objects.
     // warning: this method does not work if keys change order.
@@ -190,7 +190,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
           activeNotebook,
           KALE_NOTEBOOK_METADATA_KEY,
           this.state.metadata,
-          true
+          true,
         );
       }
     }
@@ -202,7 +202,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
    */
   handleNotebookChanged = async (
     tracker: INotebookTracker,
-    notebook: NotebookPanel | null
+    notebook: NotebookPanel | null,
   ) => {
     // Set the current notebook and wait for the session to be ready
     if (notebook) {
@@ -230,7 +230,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
       // get notebook metadata
       const notebookMetadata = NotebookUtils.getMetaData(
         notebook,
-        KALE_NOTEBOOK_METADATA_KEY
+        KALE_NOTEBOOK_METADATA_KEY,
       );
 
       let fetchedExperiments: IExperiment[] = [];
@@ -255,7 +255,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
         const { experiments, experiment, experiment_name } =
           await commands.getExperiments(
             this.state.metadata.experiment,
-            this.state.metadata.experiment_name
+            this.state.metadata.experiment_name,
           );
         fetchedExperiments = experiments;
         this.setState((prevState, props) => ({
@@ -264,8 +264,8 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
           metadata: {
             ...prevState.metadata,
             experiment,
-            experiment_name
-          }
+            experiment_name,
+          },
         }));
       }
 
@@ -280,7 +280,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
               this.state.metadata.experiment.id,
             name:
               notebookMetadata['experiment']['name'] ||
-              this.state.metadata.experiment.name
+              this.state.metadata.experiment.name,
           };
           experiment_name = experiment.name;
           // If the experiment has empty values, use the first experiment from the list if available
@@ -298,14 +298,14 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
           }
         } else if (notebookMetadata['experiment_name']) {
           const matchingExperiments = this.state.experiments.filter(
-            e => e.name === notebookMetadata['experiment_name']
+            e => e.name === notebookMetadata['experiment_name'],
           );
           if (matchingExperiments.length > 0) {
             experiment = matchingExperiments[0];
           } else {
             experiment = {
               id: NEW_EXPERIMENT.id,
-              name: notebookMetadata['experiment_name']
+              name: notebookMetadata['experiment_name'],
             };
           }
           experiment_name = notebookMetadata['experiment_name'];
@@ -338,18 +338,18 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
           base_image:
             notebookMetadata['base_image'] ||
             DefaultState.metadata.base_image,
-          steps_defaults: DefaultState.metadata.steps_defaults
+          steps_defaults: DefaultState.metadata.steps_defaults,
         };
         this.setState({
-          metadata: metadata
+          metadata: metadata,
         });
       } else {
         this.setState(prevState => ({
           metadata: {
             ...DefaultState.metadata,
             experiment: prevState.metadata.experiment,
-            experiment_name: prevState.metadata.experiment_name
-          }
+            experiment_name: prevState.metadata.experiment_name,
+          },
         }));
       }
     } else {
@@ -389,7 +389,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
     const _updateDeployProgress = (x: DeployProgressState) => {
       this.updateDeployProgress(_deployIndex, {
         ...x,
-        namespace: this.state.namespace
+        namespace: this.state.namespace,
       });
     };
 
@@ -405,7 +405,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
     if (!nbFilePath) {
       // Handle the error, show a message, or return early
       const extendedProgress: DeployProgressState = {
-        message: 'No active notebook path found.'
+        message: 'No active notebook path found.',
       };
       _updateDeployProgress(extendedProgress);
       this.setState({ runDeployment: false });
@@ -416,14 +416,14 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
     const validationSucceeded = await commands.validateMetadata(
       nbFilePath,
       metadata,
-      _updateDeployProgress
+      _updateDeployProgress,
     );
     if (!validationSucceeded) {
       this.setState({ runDeployment: false });
       return;
     }
     _updateDeployProgress({
-      message: 'Validation completed successfully'
+      message: 'Validation completed successfully',
     });
 
     // CREATE PIPELINE
@@ -432,14 +432,14 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
       metadata,
       this.props.docManager,
       this.state.deployDebugMessage,
-      _updateDeployProgress
+      _updateDeployProgress,
     );
     if (!compileNotebook) {
       this.setState({ runDeployment: false });
       return;
     }
     _updateDeployProgress({
-      message: 'Notebook compiled successfully'
+      message: 'Notebook compiled successfully',
     });
 
     // UPLOAD
@@ -449,7 +449,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
         ? await commands.uploadPipeline(
             compileNotebook.pipeline_package_path,
             compileNotebook.pipeline_metadata,
-            _updateDeployProgress
+            _updateDeployProgress,
           )
         : null;
 
@@ -464,9 +464,9 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
         pipeline: {
           pipelineid: uploadPipeline.pipeline.pipelineid,
           versionid: uploadPipeline.pipeline.versionid,
-          name: uploadPipeline.pipeline.name
-        }
-      }
+          name: uploadPipeline.pipeline.name,
+        },
+      },
     });
     // RUN
     if (this.state.deploymentType === 'run') {
@@ -475,7 +475,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
         uploadPipeline.pipeline.versionid,
         compileNotebook.pipeline_metadata,
         compileNotebook.pipeline_package_path,
-        _updateDeployProgress
+        _updateDeployProgress,
       );
       if (runPipeline) {
         commands.pollRun(runPipeline, _updateDeployProgress);
@@ -494,7 +494,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
     const selectedExperiments: IExperiment[] = this.state.experiments.filter(
       e =>
         e.id === this.state.metadata.experiment.id ||
-        e.name === this.state.metadata.experiment.name
+        e.name === this.state.metadata.experiment.name,
     );
     if (this.state.experiments.length > 0 && selectedExperiments.length === 0) {
       selectedExperiments.push(this.state.experiments[0]);
@@ -556,7 +556,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
               <p
                 style={{
                   fontSize: 'var(--jp-ui-font-size3)',
-                  color: theme.kale.headers.main
+                  color: theme.kale.headers.main,
                 }}
                 className="kale-header"
               >

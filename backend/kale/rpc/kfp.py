@@ -24,9 +24,10 @@ def _get_client(host=None):
 def list_experiments(request):
     """List Kubeflow Pipelines experiments."""
     c = _get_client()
-    experiments = [{"name": e.display_name,
-                    "id": e.experiment_id}
-                   for e in c.list_experiments().experiments or []]
+    experiments = [
+        {"name": e.display_name, "id": e.experiment_id}
+        for e in c.list_experiments().experiments or []
+    ]
     return experiments
 
 
@@ -43,7 +44,7 @@ def get_experiment(request, experiment_name):
     try:
         experiment = client.get_experiment(experiment_name=experiment_name)
     except ValueError as e:
-        err_msg = "No experiment is found with name {}".format(experiment_name)
+        err_msg = f"No experiment is found with name {experiment_name}"
         if err_msg in str(e):
             return None
         else:
@@ -65,13 +66,9 @@ def create_experiment(request, experiment_name, raise_if_exists=False):
     exp = get_experiment(None, experiment_name)
     if not exp:
         experiment = client.create_experiment(name=experiment_name)
-        return {
-            "id": experiment.experiment_id,
-            "name": experiment.display_name
-        }
+        return {"id": experiment.experiment_id, "name": experiment.display_name}
     if raise_if_exists:
-        raise ValueError("Failed to create experiment, experiment already"
-                         " exists.")
+        raise ValueError("Failed to create experiment, experiment already exists.")
 
 
 def _get_pipeline_id(pipeline_name):
@@ -81,9 +78,7 @@ def _get_pipeline_id(pipeline_name):
     while pipeline_id is None or token is not None:
         pipelines = client.list_pipelines(page_token=token)
         token = pipelines.next_page_token
-        f = next(filter(lambda x: x.display_name == pipeline_name,
-                        pipelines.pipelines),
-                 None)
+        f = next(filter(lambda x: x.display_name == pipeline_name, pipelines.pipelines), None)
         if f is not None:
             pipeline_id = f.pipeline_id
     return pipeline_id
@@ -92,31 +87,20 @@ def _get_pipeline_id(pipeline_name):
 def upload_pipeline(request, pipeline_package_path, pipeline_metadata):
     """Upload a KFP package as a new pipeline."""
     pipeline_name = pipeline_metadata["pipeline_name"]
-    pid, vid = kfputils.upload_pipeline(pipeline_package_path,
-                                        pipeline_name)
-    return {"pipeline": {"pipelineid": pid, "versionid": vid,
-                         "name": pipeline_name}}
+    pid, vid = kfputils.upload_pipeline(pipeline_package_path, pipeline_name)
+    return {"pipeline": {"pipelineid": pid, "versionid": vid, "name": pipeline_name}}
 
 
-def run_pipeline(
-    request,
-    pipeline_metadata,
-    pipeline_id,
-    version_id,
-    pipeline_package_path
-):
+def run_pipeline(request, pipeline_metadata, pipeline_id, version_id, pipeline_package_path):
     """Run a pipeline."""
     run = kfputils.run_pipeline(
         experiment_name=pipeline_metadata["experiment_name"],
         pipeline_id=pipeline_id,
         version_id=version_id,
-        pipeline_package_path=pipeline_package_path)
+        pipeline_package_path=pipeline_package_path,
+    )
 
-    return {
-        "id": run.run_id,
-        "name": run.run_info.display_name,
-        "status": run.run_info.state
-    }
+    return {"id": run.run_id, "name": run.run_info.display_name, "status": run.run_info.state}
 
 
 def get_run(request, run_id):

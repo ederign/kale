@@ -148,17 +148,17 @@ const StyledFormControl = styled(FormControl)({
   '& .MuiInputLabel-root': {
     backgroundColor: 'var(--jp-layout-color1)',
     color: 'var(--jp-input-border-color)',
-    fontSize: 'var(--jp-ui-font-size2)'
+    fontSize: 'var(--jp-ui-font-size2)',
   },
   '& .MuiInputBase-input': {
-    fontSize: 'var(--jp-ui-font-size2)'
-  }
+    fontSize: 'var(--jp-ui-font-size2)',
+  },
 });
 
 const ChipsContainer = styled('div')({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: '4px'
+  gap: '4px',
 });
 
 const StyledChip = styled(Chip)({
@@ -187,7 +187,7 @@ export const SelectMulti: React.FunctionComponent<
     disabled = false,
     variant = 'outlined',
     style = {},
-    updateSelected
+    updateSelected,
   } = props;
 
   const getInputComponent = () => {
@@ -214,9 +214,9 @@ export const SelectMulti: React.FunctionComponent<
           PaperProps: {
             sx: {
               color: 'var(--jp-ui-font-color1)',
-              fontSize: 'var(--jp-ui-font-size2)'
-            }
-          }
+              fontSize: 'var(--jp-ui-font-size2)',
+            },
+          },
         }}
         renderValue={selectedValues => (
           <ChipsContainer>
@@ -226,7 +226,7 @@ export const SelectMulti: React.FunctionComponent<
                 label={value}
                 className="kale-chip kale-chip-select"
                 sx={{
-                  backgroundColor: `#${ColorUtils.getColor(value)}`
+                  backgroundColor: `#${ColorUtils.getColor(value)}`,
                 }}
               />
             ))}

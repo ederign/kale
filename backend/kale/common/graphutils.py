@@ -59,14 +59,14 @@ def get_ordered_ancestors(g: nx.DiGraph, node):
     Returns (list): A list of ancestors, ordered by DAG layers.
     """
     # list of ancestors, unique and ordered by layers
-    ancs = list()
+    ancs = []
     # used as queue
     q = [node]
 
     while q:
         cur = q.pop(0)
         # sort ancestors for a deterministic result
-        preds = sorted(list(g.predecessors(cur)))
+        preds = sorted(g.predecessors(cur))
         for p in preds:
             if p not in ancs:
                 ancs.append(p)

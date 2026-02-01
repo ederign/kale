@@ -34,7 +34,7 @@ interface IAnnotationInputProps {
   updateValue: (
     annotation: { key: string; value: string },
     idx: number,
-    annotationIdx: number
+    annotationIdx: number,
   ) => void;
 }
 
@@ -53,7 +53,7 @@ export const AnnotationInput: React.FunctionComponent<
     props.updateValue(
       { ...props.annotation, key: key },
       props.volumeIdx,
-      props.annotationIdx
+      props.annotationIdx,
     );
   };
 
@@ -61,7 +61,7 @@ export const AnnotationInput: React.FunctionComponent<
     props.updateValue(
       { ...props.annotation, value: value },
       props.volumeIdx,
-      props.annotationIdx
+      props.annotationIdx,
     );
   };
 

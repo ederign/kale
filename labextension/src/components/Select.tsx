@@ -148,18 +148,18 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   width: '100%',
   '& .MuiInputLabel-root': {
     color: 'var(--jp-input-border-color)',
-    fontSize: 'var(--jp-ui-font-size2)'
+    fontSize: 'var(--jp-ui-font-size2)',
   },
   '& .MuiInputBase-input': {
-    color: 'var(--jp-ui-font-color1)'
+    color: 'var(--jp-ui-font-color1)',
   },
   '& .MuiFormHelperText-root': {
-    color: 'var(--jp-info-color0)'
+    color: 'var(--jp-info-color0)',
   },
   '& .MuiPaper-root': {
     backgroundColor: 'var(--jp-layout-color1)',
-    color: 'var(--jp-ui-font-color1)'
-  }
+    color: 'var(--jp-ui-font-color1)',
+  },
 }));
 
 interface ISelectProps extends BaseTextFieldProps {
@@ -206,7 +206,7 @@ export const Select: React.FC<ISelectProps> = props => {
         updateValue((evt.target as HTMLInputElement).value, index)
       }
       InputLabelProps={{
-        shrink: value !== ''
+        shrink: value !== '',
       }}
       slotProps={{
         select: {
@@ -214,11 +214,11 @@ export const Select: React.FC<ISelectProps> = props => {
             PaperProps: {
               sx: {
                 backgroundColor: 'var(--jp-layout-color1)',
-                color: 'var(--jp-ui-font-color1)'
-              }
-            }
-          }
-        }
+                color: 'var(--jp-ui-font-color1)',
+              },
+            },
+          },
+        },
       }}
     >
       {values.map((option: ISelectOption) => (
@@ -239,11 +239,11 @@ export const Select: React.FC<ISelectProps> = props => {
                     {
                       name: 'offset',
                       options: {
-                        offset: [0, -14]
-                      }
-                    }
-                  ]
-                }
+                        offset: [0, -14],
+                      },
+                    },
+                  ],
+                },
               }}
             >
               <div

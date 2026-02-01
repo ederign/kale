@@ -105,7 +105,7 @@ export default class CellUtilities {
    * Note: This function will not wait for the save to complete, it only sends a save request.
    * @returns any - The old value for the key, or undefined if it did not exist.
    */
-  // here there has to be any type - 
+  // here there has to be any type -
   public static setCellMetaData(
     notebookPanel: NotebookPanel,
     index: number,
@@ -157,7 +157,7 @@ export default class CellUtilities {
     let cell: ICellModel;
     for (let idx = 0; idx < cells.length; idx += 1) {
       cell = cells.get(idx);
-      const metadata = cell.metadata as any; 
+      const metadata = cell.metadata as any;
       // Safe metadata checking
       const hasKey = (metadata && typeof metadata.has === 'function')
         ? metadata.has(key)
@@ -297,7 +297,7 @@ export default class CellUtilities {
     if (oldIndex >= index) {
       oldIndex += 1;
     }
-    const cells = notebook.model.cells as any; 
+    const cells = notebook.model.cells as any;
     if (index <= 0) {
       // Insert at beginning
       if (typeof cells.insert === 'function') {

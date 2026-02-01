@@ -12,5 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .pyprocessor import PythonProcessor
-from .nbprocessor import NotebookProcessor, NotebookConfig
+from .nbprocessor import NotebookConfig as NotebookConfig, NotebookProcessor as NotebookProcessor
+from .pyprocessor import PythonProcessor as PythonProcessor

@@ -12,25 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from kubernetes.client.models import V1Volume
 import pytest
 from testfixtures import mock
 
-from kubernetes.client.models import V1Volume
-
 from kale.common import podutils
 
+_list_volumes_return_value = [
+    ("/mount/path", V1Volume(name="vol1"), "5Gi"),
+    ("/mount/path/other", V1Volume(name="vol2"), "5Gi"),
+    ("/other", V1Volume(name="vol3"), "5Gi"),
+]
 
-_list_volumes_return_value = [("/mount/path", V1Volume(name="vol1"), "5Gi"),
-                              ("/mount/path/other", V1Volume(name="vol2"),
-                               "5Gi"),
-                              ("/other", V1Volume(name="vol3"), "5Gi")]
 
-
-@pytest.mark.parametrize("path,ret",
-                         [("/mount/path/item", _list_volumes_return_value[0]),
-                          ("/mount/path/other/item",
-                           _list_volumes_return_value[1]),
-                          ("/other/item", _list_volumes_return_value[2])])
+@pytest.mark.parametrize(
+    "path,ret",
+    [
+        ("/mount/path/item", _list_volumes_return_value[0]),
+        ("/mount/path/other/item", _list_volumes_return_value[1]),
+        ("/other/item", _list_volumes_return_value[2]),
+    ],
+)
 @mock.patch("kale.common.podutils.list_volumes")
 @mock.patch("kale.common.podutils.os")
 def test_get_volume_containing_path(os, list_volumes, path, ret):

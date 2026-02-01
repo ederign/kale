@@ -27,11 +27,11 @@ if _version_override:
     __version__ = _version_override
 else:
     try:
-        from importlib.metadata import version as _pkg_version, PackageNotFoundError
+        from importlib.metadata import PackageNotFoundError, version as _pkg_version
     except Exception:  # Py<3.8 fallback if needed
         from importlib_metadata import (  # type: ignore
-            version as _pkg_version,
             PackageNotFoundError,
+            version as _pkg_version,
         )
 
     try:
@@ -43,32 +43,37 @@ else:
 
 # -----------------------------------------
 
-from typing import NamedTuple, Any
+from typing import Any, NamedTuple
 
 
 class PipelineParam(NamedTuple):
     """A pipeline parameter."""
+
     param_type: str
     param_value: Any
 
 
 class Artifact(NamedTuple):
     """A Step artifact."""
+
     name: str
     type: str
     is_input: bool = False
 
 
-from .step import Step, StepConfig
-from .pipeline import Pipeline, PipelineConfig, VolumeConfig
-from .compiler import Compiler
-from .processors import NotebookProcessor, NotebookConfig, PythonProcessor
 from kale.common import logutils
+
+from .compiler import Compiler
+from .pipeline import Pipeline, PipelineConfig, VolumeConfig
+from .processors import NotebookConfig, NotebookProcessor, PythonProcessor
+from .step import Step, StepConfig
 
 __all__ = [
     "PipelineParam",
     "Artifact",
+    "NotebookConfig",
     "NotebookProcessor",
+    "PythonProcessor",
     "Step",
     "StepConfig",
     "Pipeline",

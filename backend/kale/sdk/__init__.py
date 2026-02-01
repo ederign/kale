@@ -13,9 +13,9 @@
 # limitations under the License.
 
 
-from .api import pipeline, step, artifact
-
 from kale.common import logutils
+
+from .api import artifact as artifact, pipeline as pipeline, step as step
 
 logutils.get_or_create_logger(module=__name__, name="sdk")
 del logutils

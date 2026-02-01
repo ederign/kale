@@ -119,7 +119,7 @@ export const ExperimentInput: React.FunctionComponent<
 
   const options: ISelectOption[] = props.options.map(o => ({
     label: o.name,
-    value: o.id
+    value: o.id,
   }));
 
   return (

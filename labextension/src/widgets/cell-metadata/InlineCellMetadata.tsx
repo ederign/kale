@@ -20,14 +20,14 @@ import {
   Cell,
   CodeCellModel,
   ICellModel,
-  isCodeCellModel
+  isCodeCellModel,
 } from '@jupyterlab/cells';
 import CellUtils from '../../lib/CellUtils';
 import TagsUtils from '../../lib/TagsUtils';
 import { InlineMetadata } from './InlineMetadata';
 import {
   CellMetadataEditor,
-  IProps as EditorProps
+  IProps as EditorProps,
 } from './CellMetadataEditor';
 import { CellMetadataContext } from '../../lib/CellMetadataContext';
 import { Switch } from '@mui/material';
@@ -57,7 +57,7 @@ const DefaultState: IState = {
   metadataCmp: [],
   checked: false,
   editors: {},
-  isEditorVisible: false
+  isEditorVisible: false,
 };
 
 type SaveState = 'started' | 'completed' | 'failed';
@@ -102,7 +102,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
       this.connectHandlersToNotebook(this.props.notebook);
       this.refreshEditorsPropsAndInlineMetadata();
       this.setState({
-        activeCellIndex: notebook.content.activeCellIndex
+        activeCellIndex: notebook.content.activeCellIndex,
       });
     });
   };
@@ -126,7 +126,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
 
   onActiveCellChanged = (notebook: Notebook, activeCell: Cell | null) => {
     this.setState({
-      activeCellIndex: notebook.activeCellIndex
+      activeCellIndex: notebook.activeCellIndex,
     });
   };
 
@@ -138,7 +138,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
 
   handleCellChange = (
     cells: CellList,
-    args: IObservableList.IChangedArgs<ICellModel>
+    args: IObservableList.IChangedArgs<ICellModel>,
   ) => {
     this.refreshEditorsPropsAndInlineMetadata();
 
@@ -152,7 +152,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
         args.newIndex,
         'tags',
         [],
-        true
+        true,
       );
     }
 
@@ -191,8 +191,8 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
             this.props.notebook,
             {
               cell: activeCell,
-              index: this.props.notebook.content.activeCellIndex
-            }
+              index: this.props.notebook.content.activeCellIndex,
+            },
           );
         }
       }
@@ -238,7 +238,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
       if (!tags) {
         tags = {
           blockName: '',
-          prevBlockNames: []
+          prevBlockNames: [],
         };
       }
       let previousBlockName: string | undefined = '';
@@ -246,7 +246,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
       if (!tags.blockName) {
         previousBlockName = TagsUtils.getPreviousBlock(
           this.props.notebook.content,
-          index
+          index,
         );
       }
       editors[index] = {
@@ -254,7 +254,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
         stepName: tags.blockName || '',
         stepDependencies: tags.prevBlockNames || [],
         limits: tags.limits || {},
-        baseImage: tags.baseImage
+        baseImage: tags.baseImage,
       };
 
       const cellElement = this.props.notebook.content.widgets[index]
@@ -262,7 +262,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
 
       if (!cellElement) {
         console.warn(
-          `Failed to get cell element for index ${index}, skipping metadata creation`
+          `Failed to get cell element for index ${index}, skipping metadata creation`,
         );
         continue;
       }
@@ -281,14 +281,14 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
           previousBlockName={previousBlockName}
           cellIndex={index}
         />,
-        metadataParent
+        metadataParent,
       );
       metadata.push(inlineMetadataPortal);
     }
 
     this.setState({
       metadataCmp: metadata,
-      editors: editors
+      editors: editors,
     });
   };
 
@@ -314,14 +314,14 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
           stepName: activeEditorData.stepName || '',
           stepDependencies: activeEditorData.stepDependencies || [],
           limits: activeEditorData.limits || {},
-          baseImage: activeEditorData.baseImage
+          baseImage: activeEditorData.baseImage,
         }
       : {
           notebook: this.props.notebook,
           stepName: '',
           stepDependencies: [],
           limits: {},
-          baseImage: undefined
+          baseImage: undefined,
         };
 
     const cellMetadataEditor = createPortal(
@@ -332,7 +332,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
         limits={editorProps.limits}
         baseImage={editorProps.baseImage}
       />,
-      document.body
+      document.body,
     );
     return (
       <React.Fragment>
@@ -352,7 +352,7 @@ export class InlineCellsMetadata extends React.Component<IProps, IState> {
             value={{
               activeCellIndex: this.state.activeCellIndex,
               isEditorVisible: this.state.isEditorVisible,
-              onEditorVisibilityChange: this.onEditorVisibilityChange
+              onEditorVisibilityChange: this.onEditorVisibilityChange,
             }}
           >
             {cellMetadataEditor}

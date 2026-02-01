@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .config import Config, Field
-
 from kale.common import logutils
+
+from .config import Config as Config, Field as Field
+
 logutils.get_or_create_logger(module=__name__, name="config")
 del logutils

@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
-
-from typing import Any, Dict
-
 from abc import ABC, abstractmethod
+import re
+from typing import Any
 
 
 class Validator(ABC):
@@ -46,8 +44,7 @@ class TypeValidator(Validator):
 
     def _validate(self, value):
         if not isinstance(value, self.valid_type):
-            raise ValueError("'%s' must be of type '%s'"
-                             % (value, self.valid_type))
+            raise ValueError(f"'{value}' must be of type '{self.valid_type}'")
 
 
 class DictValidator(Validator):
@@ -56,9 +53,7 @@ class DictValidator(Validator):
     key_validator = None
     value_validator = None
 
-    def __init__(self,
-                 key_validator: Validator = None,
-                 value_validator: Validator = None):
+    def __init__(self, key_validator: Validator = None, value_validator: Validator = None):
         self.key_validator = key_validator or self.key_validator
         if not self.key_validator:
             raise ValueError("Set an appropriate key_validator")
@@ -66,10 +61,11 @@ class DictValidator(Validator):
         if not self.value_validator:
             raise ValueError("Set an appropriate value_validator")
 
-    def _validate(self, dictionary: Dict):
+    def _validate(self, dictionary: dict):
         if not isinstance(dictionary, dict):
-            raise ValueError("Trying to use %s to validate a non dict object"
-                             % self.__class__.__name__)
+            raise ValueError(
+                f"Trying to use {self.__class__.__name__} to validate a non dict object"
+            )
         for k, v in dictionary.items():
             self.key_validator(k)
             self.value_validator(v)
@@ -92,11 +88,10 @@ class RegexValidator(Validator):
     def _validate(self, value: str):
         if not isinstance(value, str):
             raise ValueError(
-                "%s cannot validate object of type %s. String expected."
-                % (self.__class__.__name__, str(type(value))))
+                f"{self.__class__.__name__} cannot validate object of type {str(type(value))}. String expected."
+            )
         if not re.match(self.regex, value):
-            raise ValueError("%s: '%s'. Must match regex '%s'"
-                             % (self.error_message, value, self.regex))
+            raise ValueError(f"{self.error_message}: '{value}'. Must match regex '{self.regex}'")
         return True
 
 
@@ -112,8 +107,7 @@ class EnumValidator(Validator):
 
     def _validate(self, value: Any):
         if value not in self.enum:
-            raise ValueError("%s: Value %s is not allowed"
-                             % (self.__class__.__name__, str(value)))
+            raise ValueError(f"{self.__class__.__name__}: Value {str(value)} is not allowed")
 
 
 class K8sNameValidator(RegexValidator):
@@ -141,7 +135,7 @@ class K8sAnnotationKeyValidator(RegexValidator):
     """Validates the keys of a K8s annotations dictionary."""
 
     _segment = "[a-zA-Z0-9]+([a-zA-Z0-9-_.]*[a-zA-Z0-9])?"
-    regex = r"^%s([/]%s)?$" % (_segment, _segment)
+    regex = rf"^{_segment}([/]{_segment})?$"
     error_message = "Not a valid K8s annotation key"
 
 
@@ -189,7 +183,7 @@ class K8sLabelsValidator(DictValidator):
 class VolumeTypeValidator(EnumValidator):
     """Validates the type of a Volume."""
 
-    enum = ('pv', 'pvc', 'new_pvc', 'clone')
+    enum = ("pv", "pvc", "new_pvc", "clone")
 
 
 class VolumeAccessModeValidator(EnumValidator):
@@ -207,8 +201,9 @@ class IsLowerValidator(Validator):
 
 class PositiveIntegerValidator(Validator):
     """Validates a Field to be a positive integer."""
+
     def _validate(self, value):
         if not isinstance(value, int):
-            raise ValueError("'%s' is not of type 'int'" % value)
+            raise ValueError(f"'{value}' is not of type 'int'")
         if value <= 0:
-            raise ValueError("'%s' is not a positive integer" % value)
+            raise ValueError(f"'{value}' is not a positive integer")

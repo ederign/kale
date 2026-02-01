@@ -17,7 +17,7 @@ import { Chip, Tooltip } from '@mui/material';
 import ColorUtils from '../../lib/ColorUtils';
 import {
   RESERVED_CELL_NAMES,
-  RESERVED_CELL_NAMES_HELP_TEXT
+  RESERVED_CELL_NAMES_HELP_TEXT,
 } from './CellMetadataEditor';
 import EditIcon from '@mui/icons-material/Edit';
 import { CellMetadataContext } from '../../lib/CellMetadataContext';
@@ -45,7 +45,7 @@ const DefaultState: IState = {
   color: '',
   dependencies: [],
   showEditor: false,
-  isMergedCell: false
+  isMergedCell: false,
 };
 // Check if an object is DOMElement
 function isDOMElement(obj: any): obj is HTMLElement {
@@ -88,7 +88,7 @@ export class InlineMetadata extends React.Component<IProps, IState> {
     if (isDOMElement(cellElement)) {
       cellElement.classList.remove('kale-merged-cell');
       const codeMirrorElem = cellElement.querySelector(
-        '.CodeMirror'
+        '.CodeMirror',
       ) as HTMLElement;
       if (codeMirrorElem) {
         codeMirrorElem.style.border = '';
@@ -191,7 +191,7 @@ export class InlineMetadata extends React.Component<IProps, IState> {
     }
     const name = this.props.blockName || this.props.previousBlockName;
     const codeMirrorElem = this.props.cellElement.querySelector(
-      '.CodeMirror'
+      '.CodeMirror',
     ) as HTMLElement;
 
     if (codeMirrorElem) {
@@ -254,7 +254,7 @@ export class InlineMetadata extends React.Component<IProps, IState> {
           <div
             className="kale-inline-cell-dependency"
             style={{
-              backgroundColor: `#${rgb}`
+              backgroundColor: `#${rgb}`,
             }}
           ></div>
         </Tooltip>
@@ -271,7 +271,7 @@ export class InlineMetadata extends React.Component<IProps, IState> {
 
   render() {
     const details = RESERVED_CELL_NAMES.includes(
-      this.props.blockName
+      this.props.blockName,
     ) ? null : (
       <>
         {/* Add a `depends on: ` string before the deps dots in case there are some*/}

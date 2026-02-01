@@ -12,17 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import os
 import shutil
-import logging
 
 from tabulate import tabulate
 
-from kale import marshal
-from kale.rpc.log import create_adapter
-from kale import Compiler, NotebookProcessor
+from kale import Compiler, NotebookProcessor, marshal
+from kale.common import astutils, kfputils, kfutils, podutils
 from kale.rpc.errors import RPCInternalError
-from kale.common import podutils, kfputils, kfutils, astutils
+from kale.rpc.log import create_adapter
 
 KALE_MARSHAL_DIR_POSTFIX = ".kale.marshal.dir"
 KALE_PIPELINE_STEP_ENV = "KALE_PIPELINE_STEP"
@@ -40,25 +39,27 @@ def resume_notebook_path(request, server_root=None):
     """
     p = os.environ.get("KALE_NOTEBOOK_PATH")
     if p and not os.path.isfile(p):
-        raise RuntimeError("env path KALE_NOTEBOOK_PATH=%s is not a file" % p)
+        raise RuntimeError(f"env path KALE_NOTEBOOK_PATH={p} is not a file")
     if not p:
         return None
 
     home = os.environ.get("HOME")
-    if not home.endswith('/'):
-        home = home + '/'
+    if not home.endswith("/"):
+        home = home + "/"
 
     # JupyterLab needs a relative path to open a file. If server_root is not
     # defined, assume jupyter is running under HOME
     if server_root:
         server_root = os.path.expanduser(server_root)
         if not p.startswith(server_root):
-            raise ValueError("Trying to resume a notebook from path %s, but"
-                             " the provided server root %s does not match the"
-                             " notebook's path." % (p, server_root))
-        return p[len(server_root):]
+            raise ValueError(
+                f"Trying to resume a notebook from path {p}, but"
+                f" the provided server root {server_root} does not match the"
+                " notebook's path."
+            )
+        return p[len(server_root) :]
     elif p.startswith(home):
-        return p[len(home):]
+        return p[len(home) :]
     else:
         return p
 
@@ -66,13 +67,17 @@ def resume_notebook_path(request, server_root=None):
 def list_volumes(request):
     """Get the list of mounted volumes."""
     volumes = podutils.list_volumes()
-    volumes_out = [{"type": "clone",
-                    "name": volume.name,
-                    "mount_point": path,
-                    "size": size,
-                    "size_type": "",
-                    "snapshot": False}
-                   for path, volume, size in volumes]
+    volumes_out = [
+        {
+            "type": "clone",
+            "name": volume.name,
+            "mount_point": path,
+            "size": size,
+            "size_type": "",
+            "snapshot": False,
+        }
+        for path, volume, size in volumes
+    ]
     return volumes_out
 
 
@@ -88,11 +93,9 @@ def get_base_image(request):
 
 
 # fixme: Remove the debug argument from the labextension RPC call.
-def compile_notebook(request, source_notebook_path,
-                     notebook_metadata_overrides=None, debug=False):
+def compile_notebook(request, source_notebook_path, notebook_metadata_overrides=None, debug=False):
     """Compile the notebook to KFP DSL."""
-    processor = NotebookProcessor(source_notebook_path,
-                                  notebook_metadata_overrides)
+    processor = NotebookProcessor(source_notebook_path, notebook_metadata_overrides)
     pipeline = processor.run()
     imports_and_functions = processor.get_imports_and_functions()
     script_path = Compiler(pipeline, imports_and_functions).compile()
@@ -100,15 +103,15 @@ def compile_notebook(request, source_notebook_path,
     # instance = Kale(source_notebook_path, notebook_metadata_overrides, debug)
     # instance.logger = request.log if hasattr(request, "log") else logger
 
-    package_path = kfputils.compile_pipeline(script_path,
-                                             pipeline.config.pipeline_name)
+    package_path = kfputils.compile_pipeline(script_path, pipeline.config.pipeline_name)
 
-    return {"pipeline_package_path": os.path.relpath(package_path),
-            "pipeline_metadata": pipeline.config.to_dict()}
+    return {
+        "pipeline_package_path": os.path.relpath(package_path),
+        "pipeline_metadata": pipeline.config.to_dict(),
+    }
 
 
-def validate_notebook(request, source_notebook_path,
-                      notebook_metadata_overrides=None):
+def validate_notebook(request, source_notebook_path, notebook_metadata_overrides=None):
     """Validate notebook metadata."""
     # Notebook metadata is validated at class instantiation
     NotebookProcessor(source_notebook_path, notebook_metadata_overrides)
@@ -120,13 +123,16 @@ def get_pipeline_parameters(request, source_notebook_path):
     # read notebook
     log = request.log if hasattr(request, "log") else logger
     try:
-        processor = NotebookProcessor(os.path.expanduser(source_notebook_path),
-                                      skip_validation=True)
+        processor = NotebookProcessor(
+            os.path.expanduser(source_notebook_path), skip_validation=True
+        )
         params_source = processor.get_pipeline_parameters_source()
-        if params_source == '':
-            raise ValueError("No pipeline parameters found. Please tag a cell"
-                             " of the notebook with the `pipeline-parameters`"
-                             " tag.")
+        if params_source == "":
+            raise ValueError(
+                "No pipeline parameters found. Please tag a cell"
+                " of the notebook with the `pipeline-parameters`"
+                " tag."
+            )
         # get a dict from the 'pipeline parameters' cell source code
         params_dict = astutils.parse_assignments_expressions(params_source)
     except ValueError as e:
@@ -145,27 +151,29 @@ def get_pipeline_metrics(request, source_notebook_path):
     # read notebook
     log = request.log if hasattr(request, "log") else logger
     try:
-        processor = NotebookProcessor(os.path.expanduser(source_notebook_path),
-                                      skip_validation=True)
+        processor = NotebookProcessor(
+            os.path.expanduser(source_notebook_path), skip_validation=True
+        )
         metrics_source = processor.get_pipeline_metrics_source()
-        if metrics_source == '':
-            raise ValueError("No pipeline metrics found. Please tag a cell"
-                             " of the notebook with the `pipeline-metrics`"
-                             " tag.")
+        if metrics_source == "":
+            raise ValueError(
+                "No pipeline metrics found. Please tag a cell"
+                " of the notebook with the `pipeline-metrics`"
+                " tag."
+            )
         # get a dict from the 'pipeline parameters' cell source code
         metrics = astutils.parse_metrics_print_statements(metrics_source)
     except ValueError as e:
         log.exception("Failed to parse pipeline metrics")
         raise RPCInternalError(details=str(e), trans_id=request.trans_id)
-    log.info("Pipeline metrics: {}".format(metrics))
+    log.info(f"Pipeline metrics: {metrics}")
     return metrics
 
 
 def _get_kale_marshal_dir(source_notebook_path):
     nb_file_name = os.path.basename(source_notebook_path)
     nb_dir_name = os.path.dirname(source_notebook_path)
-    kale_marshal_dir_name = ".{}{}".format(nb_file_name,
-                                           KALE_MARSHAL_DIR_POSTFIX)
+    kale_marshal_dir_name = f".{nb_file_name}{KALE_MARSHAL_DIR_POSTFIX}"
     return os.path.realpath(os.path.join(nb_dir_name, kale_marshal_dir_name))
 
 
@@ -177,9 +185,10 @@ def unmarshal_data(source_notebook_path):
         return {}
 
     marshal.set_data_dir(kale_marshal_dir)
-    return {os.path.splitext(f)[0]:
-            marshal.load(os.path.splitext(f)[0])
-            for f in os.listdir(kale_marshal_dir)}
+    return {
+        os.path.splitext(f)[0]: marshal.load(os.path.splitext(f)[0])
+        for f in os.listdir(kale_marshal_dir)
+    }
 
 
 def explore_notebook(request, source_notebook_path):
@@ -194,15 +203,13 @@ def explore_notebook(request, source_notebook_path):
     elif final_snapshot == "false":
         final_snapshot = False
     else:
-        raise ValueError("Env %s: Expected 'true' or 'false', but got: %s"
-                         % (KALE_SNAPSHOT_FINAL_ENV, final_snapshot))
+        raise ValueError(
+            f"Env {KALE_SNAPSHOT_FINAL_ENV}: Expected 'true' or 'false', but got: {final_snapshot}"
+        )
 
     if step_name and os.path.exists(kale_marshal_dir):
-        return {"is_exploration": True,
-                "step_name": step_name,
-                "final_snapshot": final_snapshot}
-    return {"is_exploration": False,
-            "step_name": ""}
+        return {"is_exploration": True, "step_name": step_name, "final_snapshot": final_snapshot}
+    return {"is_exploration": False, "step_name": ""}
 
 
 def remove_marshal_dir(request, source_notebook_path):

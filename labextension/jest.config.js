@@ -23,7 +23,7 @@ const esModules = [
   'vscode-ws-jsonrpc',
   'y-protocols',
   'y-websocket',
-  'yjs'
+  'yjs',
 ].join('|');
 
 const baseConfig = jestJupyterLab(__dirname);
@@ -34,10 +34,10 @@ module.exports = {
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/**/.ipynb_checkpoints/*'
+    '!src/**/.ipynb_checkpoints/*',
   ],
   coverageReporters: ['lcov', 'text'],
   testRegex: 'src/.*/.*.spec.ts[x]?$',
   testPathIgnorePatterns: ['/node_modules/', '/ui-tests/'],
-  transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+  transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
 };

@@ -63,4 +63,4 @@ export default [
       'prefer-arrow-callback': 'error',
     },
   },
-]; 
+];

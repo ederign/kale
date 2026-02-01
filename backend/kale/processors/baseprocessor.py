@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from abc import ABC, abstractmethod
+import logging
 
 from kale.common import kfutils
 from kale.pipeline import Pipeline, PipelineConfig, Step
-from typing import Optional
 
 log = logging.getLogger(__name__)
 
@@ -30,10 +28,9 @@ class BaseProcessor(ABC):
     no_op_step: Step
     config_cls = PipelineConfig
 
-    def __init__(self,
-                 config: Optional[PipelineConfig] = None,
-                 skip_validation: bool = False,
-                 **kwargs):
+    def __init__(
+        self, config: PipelineConfig | None = None, skip_validation: bool = False, **kwargs
+    ):
         self.config = config
         if not config and not skip_validation:
             self.config = self.config_cls(**kwargs)
@@ -62,14 +59,15 @@ class BaseProcessor(ABC):
         # FIXME: We should reconsider the implementation of
         #  https://github.com/kubeflow-kale/kale/pull/175/files to
         #  avoid using an RPC and always detect PodDefaults here.
-        _pod_defaults_labels = dict()
+        _pod_defaults_labels = {}
         try:
             _pod_defaults_labels = kfutils.find_poddefault_labels()
         except Exception as e:
             log.warning("Could not retrieve PodDefaults. Reason: %s", e)
         self.pipeline.config.steps_defaults["labels"] = {
-            **self.pipeline.config.steps_defaults.get("labels", dict()),
-            **_pod_defaults_labels}
+            **self.pipeline.config.steps_defaults.get("labels", {}),
+            **_pod_defaults_labels,
+        }
 
     def _apply_steps_defaults(self):
         for step in self.pipeline.steps:

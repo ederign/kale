@@ -37,7 +37,7 @@ export const globalUnhandledRejection = async (event: any) => {
       const extensionName = getExtensionName(stackLines)
       Notification.error(`An unhandled error has been thrown.`, {
         actions: [
-          { label: 'Details', callback: () => NotebookUtils.showMessage(alert_string, 
+          { label: 'Details', callback: () => NotebookUtils.showMessage(alert_string,
             ["An unhandled error was thrown from:",
               extensionName,
               "Please see console for more details."
@@ -325,7 +325,7 @@ export abstract class BaseError extends Error {
     super(message);
     this.name = this.constructor.name;
     this.stack = new Error(message).stack;
-    
+
     Object.setPrototypeOf(this, BaseError.prototype);
   }
 

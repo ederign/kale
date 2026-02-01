@@ -21,5 +21,5 @@ module.exports = {
   trailingComma: 'all',
   bracketSpacing: true,
   arrowParens: 'avoid',
-  proseWrap: 'preserve'
+  proseWrap: 'preserve',
 };

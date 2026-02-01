@@ -31,7 +31,8 @@ test('should emit an activation console message', async ({ page }) => {
 
   expect(
     logs.filter(
-      s => s === 'JupyterLab extension kubeflow-kale-labextension is activated!'
-    )
+      s =>
+        s === 'JupyterLab extension kubeflow-kale-labextension is activated!',
+    ),
   ).toHaveLength(1);
 });

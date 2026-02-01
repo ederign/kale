@@ -22,7 +22,7 @@ import {
   DialogTitle,
   Grid,
   Switch,
-  Box
+  Box,
 } from '@mui/material';
 import ColorUtils from '../../lib/ColorUtils';
 import { Input } from '../../components/Input';
@@ -30,7 +30,7 @@ import { Select } from '../../components/Select';
 
 const GPU_TYPES = [
   { value: 'nvidia.com/gpu', label: 'Nvidia' },
-  { value: 'amd.com/gpu', label: 'AMD' }
+  { value: 'amd.com/gpu', label: 'AMD' },
 ];
 const DEFAULT_GPU_TYPE = GPU_TYPES[0].value;
 
@@ -58,19 +58,19 @@ export const CellMetadataEditorDialog: React.FunctionComponent<
   const limitAction = (
     action: ILimitAction['action'],
     limitKey: ILimitAction['limitKey'],
-    limitValue: ILimitAction['limitValue'] = undefined
+    limitValue: ILimitAction['limitValue'] = undefined,
   ) => {
     return {
       action,
       limitKey,
-      limitValue
+      limitValue,
     };
   };
 
   // intersect the current limits and the GPU_TYPES. Assume there is at most 1.
   const gpuType =
     Object.keys(props.limits).filter(x =>
-      GPU_TYPES.map(t => t.value).includes(x)
+      GPU_TYPES.map(t => t.value).includes(x),
     )[0] || undefined;
   const gpuCount = gpuType && props.limits[gpuType];
 
@@ -90,7 +90,7 @@ export const CellMetadataEditorDialog: React.FunctionComponent<
           sx={{
             flexDirection: 'row',
             justifyContent: 'space-between',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
         >
           <Grid size={{ xs: 9 }}>
@@ -99,7 +99,7 @@ export const CellMetadataEditorDialog: React.FunctionComponent<
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'flex-start',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <p>Require GPU for step </p>
@@ -107,7 +107,7 @@ export const CellMetadataEditorDialog: React.FunctionComponent<
                 className={'kale-chip'}
                 style={{
                   marginLeft: '10px',
-                  backgroundColor: `#${ColorUtils.getColor(props.stepName)}`
+                  backgroundColor: `#${ColorUtils.getColor(props.stepName)}`,
                 }}
                 key={props.stepName}
                 label={props.stepName}
@@ -120,7 +120,7 @@ export const CellMetadataEditorDialog: React.FunctionComponent<
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <Switch
@@ -129,7 +129,7 @@ export const CellMetadataEditorDialog: React.FunctionComponent<
                   if (c.target.checked) {
                     // default value
                     props.updateLimits([
-                      limitAction('update', DEFAULT_GPU_TYPE, '1')
+                      limitAction('update', DEFAULT_GPU_TYPE, '1'),
                     ]);
                   } else {
                     if (gpuType) {
@@ -152,7 +152,7 @@ export const CellMetadataEditorDialog: React.FunctionComponent<
           sx={{
             flexDirection: 'column',
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
         >
           <Grid
@@ -161,7 +161,7 @@ export const CellMetadataEditorDialog: React.FunctionComponent<
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginTop: '15px'
+              marginTop: '15px',
             }}
           >
             <Grid size={{ xs: 6 }}>
