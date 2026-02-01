@@ -4,6 +4,7 @@
 import argparse
 from argparse import RawTextHelpFormatter
 import os
+import    sys,json  # bad: unsorted, unused imports with weird spacing
 
 from kale.common import kfputils
 from kale.compiler import Compiler
