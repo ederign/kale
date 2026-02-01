@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2019–2025 The Kale Contributors.
 
-import json
 import base64
+import json
 
 
 def serialize(value):

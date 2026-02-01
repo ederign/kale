@@ -36,7 +36,7 @@ export default class DeployUtils {
     warningText: '#ee8100',
     weak: '#9aa0a6',
     // From Rok repo
-    canceled: '#ff992a'
+    canceled: '#ff992a',
   };
 
   public static getInfoBadge(title: string, content: string[]) {
@@ -66,7 +66,7 @@ export default class DeployUtils {
             style={{
               color: this.color.alert,
               height: 18,
-              width: 18
+              width: 18,
             }}
           />
         </a>

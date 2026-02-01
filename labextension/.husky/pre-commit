@@ -1,0 +1,1 @@
+cd labextension && jlpm lint-staged

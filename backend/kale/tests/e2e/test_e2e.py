@@ -2,9 +2,9 @@
 # Copyright (c) 2019–2025 The Kale Contributors.
 
 import os
-import pytest
-
 from unittest import mock
+
+import pytest
 
 from kale import Compiler, NotebookProcessor
 
@@ -12,14 +12,19 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 EXAMPLES_DIR = os.path.join(THIS_DIR, "../../../../examples/")
 
 
-@pytest.mark.parametrize("notebook_path,dsl_path", [
-    (os.path.join(EXAMPLES_DIR, "serving/sklearn/iris.ipynb"),
-     os.path.join(THIS_DIR, "../assets/kfp_dsl/", "iris.py")),
-    (os.path.join(THIS_DIR,
-                  "../assets/notebooks/pipeline_parameters_and_metrics.ipynb"),
-     os.path.join(THIS_DIR, "../assets/kfp_dsl/",
-                  "pipeline_parameters_and_metrics.py")),
-])
+@pytest.mark.parametrize(
+    "notebook_path,dsl_path",
+    [
+        (
+            os.path.join(EXAMPLES_DIR, "serving/sklearn/iris.ipynb"),
+            os.path.join(THIS_DIR, "../assets/kfp_dsl/", "iris.py"),
+        ),
+        (
+            os.path.join(THIS_DIR, "../assets/notebooks/pipeline_parameters_and_metrics.ipynb"),
+            os.path.join(THIS_DIR, "../assets/kfp_dsl/", "pipeline_parameters_and_metrics.py"),
+        ),
+    ],
+)
 @mock.patch("kale.compiler.KALE_VERSION", new="0+unknown")
 @mock.patch("kale.common.utils.random_string")
 def test_notebook_to_dsl(random_string, notebook_path, dsl_path):
