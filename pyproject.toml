@@ -9,6 +9,9 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
+[project.optional-dependencies]
+dev = ["pre-commit"]
+
 [tool.uv]
 # This is a virtual workspace - not a buildable package itself
 package = false

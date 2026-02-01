@@ -14,36 +14,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # TODO: Fix linting in a later PR - currently broken
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Install uv
-  #       uses: astral-sh/setup-uv@v4
-  #       with:
-  #         version: "latest"
-  #
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: "3.12"
-  #
-  #     - name: Install dependencies
-  #       run: |
-  #         uv sync --all-packages --all-extras --frozen
-  #         cd labextension && uv run jlpm install
-  #
-  #     - name: Lint labextension
-  #       run: make lint-labextension
-
-  prettier:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Placeholder for prettier
-        run: echo "TODO - prettier linting to be enabled in a follow-up PR"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          uv sync --all-packages --all-extras --frozen
+          cd labextension && uv run jlpm install
+
+      - name: Lint labextension
+        run: make lint-labextension
 
   build:
     runs-on: ubuntu-latest
