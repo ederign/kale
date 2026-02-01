@@ -127,37 +127,27 @@ def upload_pipeline(
     client = _get_kfp_client(host)
     log.info("Uploading pipeline '%s'...", pipeline_name)
     pipeline_id = get_pipeline_id(pipeline_name, host=host)
-    version_name = utils.random_string()
     if not pipeline_id:
-        # The first version of the pipeline is set to the pipeline name value.
-        # To work around this, upload the first pipeline, then another one
-        # with a proper version name. Finally delete the original pipeline.
+        # New pipeline: upload_pipeline creates a default version automatically
         upp = client.upload_pipeline(
             pipeline_package_path=pipeline_package_path, pipeline_name=pipeline_name
         )
         pipeline_id = upp.pipeline_id
-        log.info("Uploaded Pipeline '%s' id: %s", pipeline_name, pipeline_id)
-        upv = client.upload_pipeline_version(
-            pipeline_package_path=pipeline_package_path,
-            pipeline_version_name=version_name,
-            pipeline_id=pipeline_id,
-        )
-        # delete the first version which has the same name as the pipeline
+        log.info("Uploaded pipeline '%s' with id: %s", pipeline_name, pipeline_id)
+        # Get the default version that was created with the pipeline
         versions = client.list_pipeline_versions(pipeline_id=pipeline_id)
-        sorted_versions = sorted(versions.pipeline_versions, key=lambda v: v.created_at)
-        delete_vid = sorted_versions[0].pipeline_version_id
-        client.delete_pipeline_version(pipeline_id=pipeline_id, pipeline_version_id=delete_vid)
-        log.info(
-            "Deleted pipeline version with name '%s' and ID: %s", pipeline_name, upp.pipeline_id
-        )
+        version_id = versions.pipeline_versions[0].pipeline_version_id
     else:
+        # Existing pipeline: upload a new version
+        version_name = utils.random_string()
         upv = client.upload_pipeline_version(
             pipeline_package_path=pipeline_package_path,
             pipeline_version_name=version_name,
             pipeline_id=pipeline_id,
         )
-    log.info("Successfully uploaded version '%s' for pipeline '%s'.", version_name, pipeline_name)
-    return pipeline_id, upv.pipeline_version_id
+        version_id = upv.pipeline_version_id
+        log.info("Uploaded version '%s' for pipeline '%s'.", version_name, pipeline_name)
+    return pipeline_id, version_id
 
 
 def run_pipeline(
