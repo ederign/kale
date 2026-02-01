@@ -5,7 +5,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
   ILabShell,
-  ILayoutRestorer
+  ILayoutRestorer,
 } from '@jupyterlab/application';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
@@ -30,7 +30,7 @@ import { LabIcon } from '@jupyterlab/ui-components';
 
 /* tslint:disable */
 export const IKubeflowKale = new Token<IKubeflowKale>(
-  'kubeflow-kale-labextension:IKubeflowKale'
+  'kubeflow-kale-labextension:IKubeflowKale',
 );
 
 export interface IKubeflowKale {
@@ -49,7 +49,7 @@ export default {
   id,
   requires: [ILabShell, ILayoutRestorer, INotebookTracker, IDocumentManager],
   provides: IKubeflowKale,
-  autoStart: true
+  autoStart: true,
 } as JupyterFrontEndPlugin<IKubeflowKale>;
 
 async function activate(
@@ -57,7 +57,7 @@ async function activate(
   labShell: ILabShell,
   restorer: ILayoutRestorer,
   tracker: INotebookTracker,
-  docManager: IDocumentManager
+  docManager: IDocumentManager,
 ): Promise<IKubeflowKale> {
   let widget: ReactWidget | undefined;
   const kernel: Kernel.IKernelConnection =
@@ -98,7 +98,7 @@ async function activate(
       // Check if KALE_NOTEBOOK_PATH env variable exists and if so load
       // that Notebook
       const path = await executeRpc(kernel, 'nb.resume_notebook_path', {
-        server_root: PageConfig.getOption('serverRoot')
+        server_root: PageConfig.getOption('serverRoot'),
       });
       if (path) {
         console.log('Resuming notebook ' + path);
@@ -129,7 +129,7 @@ async function activate(
         docManager={docManager}
         backend={backend}
         kernel={kernel}
-      />
+      />,
     );
     widget.id = 'kubeflow-kale-labextension/kubeflowDeployment';
     widget.title.icon = kaleIcon;
@@ -151,6 +151,6 @@ async function activate(
         throw new Error('Widget not initialized yet');
       }
       return widget;
-    }
+    },
   };
 }

@@ -163,18 +163,20 @@ const StyledTextField = styled(TextField)({
   width: '100%',
   '& .MuiInputLabel-root': {
     color: 'var(--jp-input-border-color)',
-    fontSize: 'var(--jp-ui-font-size2)'
+    fontSize: 'var(--jp-ui-font-size2)',
   },
   '& .MuiInputBase-input': {
-    color: 'var(--jp-ui-font-color1)'
+    color: 'var(--jp-ui-font-color1)',
   },
   '& .MuiFormHelperText-root': {
-    color: 'var(--jp-info-color0)'
-  }
+    color: 'var(--jp-info-color0)',
+  },
 });
 
-export interface IInputProps
-  extends Omit<TextFieldProps, 'onChange' | 'value'> {
+export interface IInputProps extends Omit<
+  TextFieldProps,
+  'onChange' | 'value'
+> {
   value: string | number;
   regex?: string;
   regexErrorMsg?: string;
@@ -261,7 +263,7 @@ export const Input: React.FunctionComponent<IInputProps> = props => {
       onChange(value, idx);
     },
     // delay in ms
-    500
+    500,
   );
 
   const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -295,11 +297,11 @@ export const Input: React.FunctionComponent<IInputProps> = props => {
       slotProps={{
         input: {
           readOnly: readOnly,
-          ...InputProps
+          ...InputProps,
         },
         inputLabel: {
-          shrink: !!placeholder || value !== ''
-        }
+          shrink: !!placeholder || value !== '',
+        },
       }}
       onChange={handleChange}
     />

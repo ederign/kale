@@ -20,10 +20,10 @@
 
 > [!NOTE]
 > ## Project Status Update 🚀
-> 
-> After several years of inactivity, we’re excited to announce that Kale development has restarted! 🎉  
+>
+> After several years of inactivity, we’re excited to announce that Kale development has restarted! 🎉
 > Kale was widely appreciated by the community back in the day, and our current goal is to re-establish a solid baseline by updating all components to the latest versions and ensuring full compatibility with the most recent Kubeflow releases.
-> 
+>
 > See all details in the [**Road to 2.0 issue**](https://github.com/kubeflow-kale/kale/issues/457)
 
 
@@ -140,5 +140,5 @@ See [CONTRIBUTE.md](CONTRIBUTE.md) for detailed development instructions, includ
 
 #### Kale v2.0 Demo
 Watch the KubeFlow Kale Demo - Introduction video below.
-  
+
 [![Demo](https://img.youtube.com/vi/UGLJuqJqJYY/hqdefault.jpg)](https://www.youtube.com/watch?v=UGLJuqJqJYY)

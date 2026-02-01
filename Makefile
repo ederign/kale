@@ -3,7 +3,7 @@
 
 .PHONY: help dev install \
         test test-backend test-backend-unit test-labextension test-e2e test-e2e-install \
-        lint lint-backend lint-labextension format-labextension \
+        lint lint-backend lint-labextension format-labextension format-backend \
         build-backend build-labextension \
         kfp-build kfp-serve kfp-compile kfp-run \
         clean clean-venv lock lock-upgrade check-uv \
@@ -51,7 +51,13 @@ dev: check-uv ## Set up development environment
 	SETUPTOOLS_SCM_PRETEND_VERSION=$(DEV_VERSION) $(UV) sync --all-packages --all-extras
 	@# Step 4: Link extension for development (must run from labextension directory)
 	cd labextension && SETUPTOOLS_SCM_PRETEND_VERSION=$(DEV_VERSION) $(UV) run jupyter labextension develop . --overwrite
-	@command -v pre-commit >/dev/null 2>&1 && pre-commit install || printf "$(YELLOW)Tip: Install pre-commit for git hooks (pip install pre-commit)\n$(NC)"
+	@# Step 5: Set up Husky git hooks for labextension
+	cd labextension && $(JLPM) prepare
+	@# Step 6: Set up pre-commit hooks for Python
+	@$(UV) run pre-commit install 2>/dev/null || { \
+		printf "$(YELLOW)Note: pre-commit hooks not installed (core.hooksPath is set globally).\n$(NC)"; \
+		printf "$(YELLOW)To enable pre-commit hooks, run: git config --unset core.hooksPath\n$(NC)"; \
+	}
 	@printf "$(GREEN)Setup complete! Run 'make jupyter' to start JupyterLab\n$(NC)"
 
 install: dev ## Alias for dev
@@ -98,6 +104,10 @@ lint-labextension: ## Lint labextension code (eslint + prettier)
 
 format-labextension: ## Format labextension code
 	cd labextension && $(JLPM) prettier && $(JLPM) eslint
+
+format-backend: ## Format backend code (ruff)
+	$(UV) run ruff check --fix backend
+	$(UV) run ruff format backend
 
 ##@ Building
 

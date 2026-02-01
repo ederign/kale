@@ -28,13 +28,13 @@ enum PipelineStatus {
   SUCCEEDED = 'SUCCEEDED',
   TERMINATING = 'TERMINATING',
   TERMINATED = 'TERMINATED',
-  UNKNOWN = 'UNKNOWN'
+  UNKNOWN = 'UNKNOWN',
 }
 
 const logLinksHint = (kfpUiHost: string) => {
   console.info(
     `default for upload and run links is ${kfpUiHost} ` +
-      'if your kpf ui is running somewhere else, set the KF_PIPELINES_UI_ENDPOINT environment variable.'
+      'if your kpf ui is running somewhere else, set the KF_PIPELINES_UI_ENDPOINT environment variable.',
   );
 };
 
@@ -148,7 +148,7 @@ export const DeployProgress: React.FunctionComponent<
         const message = [
           `File path: <pre><b>${props.compiledPath}</b></pre>`,
           '',
-          'Probable cause: the file is hidden, try running jupyterlab with the --ContentsManager.allow_hidden=True flag'
+          'Probable cause: the file is hidden, try running jupyterlab with the --ContentsManager.allow_hidden=True flag',
         ];
         NotebookUtils.showMessage(title, message);
       }
@@ -277,7 +277,7 @@ export const DeployProgress: React.FunctionComponent<
           justifyContent: 'flex-end',
           textAlign: 'right',
           paddingRight: '4px',
-          height: '1rem'
+          height: '1rem',
         }}
       >
         <CloseIcon
@@ -293,7 +293,7 @@ export const DeployProgress: React.FunctionComponent<
             {validationTpl}
             {DeployUtils.getWarningBadge(
               'Validation Warnings',
-              props.validationWarnings || []
+              props.validationWarnings || [],
             )}
           </div>
         </div>
@@ -306,7 +306,7 @@ export const DeployProgress: React.FunctionComponent<
             {compileTpl}
             {DeployUtils.getWarningBadge(
               'Compile Warnings',
-              props.compileWarnings || []
+              props.compileWarnings || [],
             )}
           </div>
         </div>
@@ -319,7 +319,7 @@ export const DeployProgress: React.FunctionComponent<
             {uploadTpl}
             {DeployUtils.getWarningBadge(
               'Upload Warnings',
-              props.uploadWarnings || []
+              props.uploadWarnings || [],
             )}
           </div>
         </div>
@@ -332,7 +332,7 @@ export const DeployProgress: React.FunctionComponent<
             {runTpl}
             {DeployUtils.getWarningBadge(
               'Run Warnings',
-              props.runWarnings || []
+              props.runWarnings || [],
             )}
           </div>
         </div>

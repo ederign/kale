@@ -3,8 +3,7 @@
 
 import logging
 
-from kale.marshal.backend import get_dispatcher, MarshalBackend
-
+from kale.marshal.backend import MarshalBackend, get_dispatcher
 
 log = logging.getLogger(__name__)
 
@@ -15,6 +14,7 @@ register_backend = get_dispatcher().register
 @register_backend
 class FunctionBackend(MarshalBackend):
     """Marshal Python functions."""
+
     name = "Function backend"
     display_name = "function"
     file_type = "pyfn"
@@ -24,6 +24,7 @@ class FunctionBackend(MarshalBackend):
 @register_backend
 class SKLearnBackend(MarshalBackend):
     """Marshal SKLearn objects."""
+
     name = "SKLearn backend"
     display_name = "scikit-learn"
     file_type = "joblib"
@@ -38,17 +39,20 @@ class SKLearnBackend(MarshalBackend):
     def save(self, obj, path):
         """Save a SKLearn object."""
         import joblib
+
         joblib.dump(obj, path)
 
     def load(self, file_path):
         """Restore a SKLearn object."""
         import joblib
+
         return joblib.load(file_path)
 
 
 @register_backend
 class NumpyBackend(MarshalBackend):
     """Marshal Numpy objects functions."""
+
     name = "Numpy backend"
     display_name = "numpy"
     file_type = "npy"
@@ -57,17 +61,20 @@ class NumpyBackend(MarshalBackend):
     def save(self, obj, path):
         """Save a Numpy object."""
         import numpy as np
+
         np.save(path, obj)
 
     def load(self, file_path):
         """Restore a Numpy object."""
         import numpy as np
+
         return np.load(file_path)
 
 
 @register_backend
 class PandasBackend(MarshalBackend):
     """Marshal Pandas objects."""
+
     name = "Pandas backend"
     display_name = "pandas"
     file_type = "pdpkl"
@@ -76,17 +83,20 @@ class PandasBackend(MarshalBackend):
     def save(self, obj, path):
         """Save a Pandas object."""
         import pandas as pd  # noqa: F401
+
         obj.to_pickle(path)
 
     def load(self, file_path):
         """Restore a Pandas object."""
         import pandas as pd
+
         return pd.read_pickle(file_path)
 
 
 @register_backend
 class XGBoostModelBackend(MarshalBackend):
     """Marshal XGBoost Model object."""
+
     name = "XGBoost Model backend"
     display_name = "xgboost"
     file_type = "bst"
@@ -100,6 +110,7 @@ class XGBoostModelBackend(MarshalBackend):
     def load(self, file_path):
         """Restore an XGBoost Model object."""
         import xgboost as xgb
+
         obj_xgb = xgb.Booster()
         obj_xgb.load_model(file_path)
         return obj_xgb
@@ -108,6 +119,7 @@ class XGBoostModelBackend(MarshalBackend):
 @register_backend
 class XGBoostDMatrixBackend(MarshalBackend):
     """Marshal XGBoost DMatrix object."""
+
     name = "XGBoost DMatrix backend"
     display_name = "xgboost-dmatrix"
     file_type = "dmatrix"
@@ -120,12 +132,14 @@ class XGBoostDMatrixBackend(MarshalBackend):
     def load(self, file_path):
         """Restore an XGBoost DMatrix object."""
         import xgboost as xgb
+
         return xgb.DMatrix(file_path)
 
 
 @register_backend
 class PyTorchBackend(MarshalBackend):
     """Marshal PyTorch objects."""
+
     name = "PyTorch backend"
     display_name = "pytorch"
     file_type = "pt"
@@ -134,12 +148,14 @@ class PyTorchBackend(MarshalBackend):
     def save(self, obj, path):
         """Save a PyTorch object."""
         import torch
+
         model_script = torch.jit.script(obj)
         model_script.save(path)
 
     def load(self, file_path):
         """Restore a PyTorch object."""
         import torch
+
         obj_torch = torch.jit.load(file_path)
         # `jit.load` returns a `ScirptModule` object.
         # To turn it into a PyTorch `Module` again
@@ -157,6 +173,7 @@ class PyTorchBackend(MarshalBackend):
 @register_backend
 class KerasBackend(MarshalBackend):
     """Marshal Keras objects."""
+
     name = "Keras backend"
     display_name = "keras"
     file_type = "keras"
@@ -165,17 +182,20 @@ class KerasBackend(MarshalBackend):
     def save(self, obj, path):
         """Save a Keras object."""
         import keras  # noqa: F401
+
         obj.save(path)
 
     def load(self, file_path):
         """Restore a Keras object."""
         from keras.models import load_model
+
         return load_model(file_path)
 
 
 @register_backend
 class TensorflowKerasBackend(MarshalBackend):
     """Marshal Tensorflow Keras objects."""
+
     name = "Tensorflow backend"
     display_name = "tensorflow"
     file_type = "tfkeras"
@@ -185,6 +205,7 @@ class TensorflowKerasBackend(MarshalBackend):
     def save(self, obj, path):
         """Save a Tensorflow Keras object."""
         import tensorflow.keras  # noqa: F401
+
         # XXX: Adding `/1` since tensorflow serve expects the model's models
         #  to be saved under a versioned folder
         obj.save(path + "/1")
@@ -192,6 +213,7 @@ class TensorflowKerasBackend(MarshalBackend):
     def load(self, file_path):
         """Restore a Tensorflow Keras object."""
         from tensorflow.keras.models import load_model
+
         try:
             obj = load_model(file_path, compile=False)
         except OSError:
