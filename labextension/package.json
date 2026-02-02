@@ -29,7 +29,6 @@
     "url": "https://github.com/kubeflow-kale/kale.git"
   },
   "scripts": {
-    "prepare": "husky",
     "build": "jlpm build:lib && jlpm build:labextension:dev",
     "build:prod": "jlpm clean && jlpm build:lib:prod && jlpm build:labextension",
     "build:labextension": "jupyter labextension build .",
@@ -82,9 +81,7 @@
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^5.0.0",
-    "husky": "^9.1.7",
     "jest": "^29.2.0",
-    "lint-staged": "^16.2.7",
     "mkdirp": "^1.0.3",
     "npm-run-all2": "^7.0.1",
     "prettier": "^3.0.0",
@@ -123,17 +120,6 @@
     },
     "extension": true,
     "outputDir": "kubeflow_kale_labextension/labextension"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.css": [
-      "stylelint --fix",
-      "prettier --write"
-    ],
-    "*.{js,json,md}": "prettier --write"
   },
   "stylelint": {
     "extends": [

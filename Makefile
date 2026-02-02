@@ -51,9 +51,7 @@ dev: check-uv ## Set up development environment
 	SETUPTOOLS_SCM_PRETEND_VERSION=$(DEV_VERSION) $(UV) sync --all-packages --all-extras
 	@# Step 4: Link extension for development (must run from labextension directory)
 	cd labextension && SETUPTOOLS_SCM_PRETEND_VERSION=$(DEV_VERSION) $(UV) run jupyter labextension develop . --overwrite
-	@# Step 5: Set up Husky git hooks for labextension
-	cd labextension && $(JLPM) prepare
-	@# Step 6: Set up pre-commit hooks for Python
+	@# Step 5: Set up pre-commit hooks (Python + TypeScript/JavaScript linting)
 	@$(UV) run pre-commit install 2>/dev/null || { \
 		printf "$(YELLOW)Note: pre-commit hooks not installed (core.hooksPath is set globally).\n$(NC)"; \
 		printf "$(YELLOW)To enable pre-commit hooks, run: git config --unset core.hooksPath\n$(NC)"; \

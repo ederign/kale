@@ -27,3 +27,27 @@ repos:
         exclude: ^(backend/kale/tests/assets/|examples/|labextension/ui-tests/)
       - id: ruff-format
         exclude: ^(backend/kale/tests/assets/|examples/|labextension/ui-tests/)
+
+  # TypeScript/JavaScript linting for labextension
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint (labextension)
+        entry: bash -c 'cd labextension && uv run jlpm eslint:check --fix'
+        language: system
+        files: ^labextension/src/.*\.(ts|tsx)$
+        pass_filenames: false
+
+      - id: prettier-ts
+        name: prettier (labextension ts/tsx)
+        entry: bash -c 'cd labextension && uv run jlpm prettier:base --write'
+        language: system
+        files: ^labextension/src/.*\.(ts|tsx)$
+        pass_filenames: false
+
+      - id: stylelint
+        name: stylelint (labextension)
+        entry: bash -c 'cd labextension && uv run jlpm stylelint'
+        language: system
+        files: ^labextension/style/.*\.css$
+        pass_filenames: false
