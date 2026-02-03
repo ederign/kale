@@ -42,6 +42,14 @@ def auto_generated_pipeline(
 
     {{ step.name }}_task.set_display_name("{{ component_names[step.name] }}-step")
 
+    {%- if step.config.limits %}
+    {%- for limit_key, limit_value in step.config.limits.items() %}
+    {%- if limit_key in ['nvidia.com/gpu', 'amd.com/gpu'] %}
+    {{ step.name }}_task.set_accelerator_type("{{ limit_key }}").set_accelerator_limit({{ limit_value }})
+    {%- endif %}
+    {%- endfor %}
+    {%- endif %}
+
 {% endfor %}
 
 if __name__ == "__main__":
