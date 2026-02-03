@@ -336,8 +336,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
           pipeline_name: notebookMetadata['pipeline_name'] || '',
           pipeline_description: notebookMetadata['pipeline_description'] || '',
           base_image:
-            notebookMetadata['base_image'] ||
-            DefaultState.metadata.base_image,
+            notebookMetadata['base_image'] || DefaultState.metadata.base_image,
           steps_defaults: DefaultState.metadata.steps_defaults,
         };
         this.setState({

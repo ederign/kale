@@ -378,14 +378,14 @@ export class CellMetadataEditor extends React.Component<IProps, IState> {
       blockName: this.props.stepName || '',
       prevBlockNames: this.props.stepDependencies,
       limits: this.props.limits || {},
-      baseImage: value || undefined
+      baseImage: value || undefined,
     };
 
     TagsUtils.setKaleCellTags(
       this.props.notebook,
       this.context.activeCellIndex,
       currentCellMetadata,
-      true
+      true,
     );
   };
 
