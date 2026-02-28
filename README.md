@@ -103,10 +103,36 @@ jupyter lab
 
 <img alt="Kale JupyterLab Extension" src="docs/imgs/Extension.png"/>
 
-## FAQ
+## Docker (Local Testing)
 
-To build images to be used as a NotebookServer in Kubeflow, refer to the
-Dockerfile in the `docker` folder.
+You can test Kale in a Kubeflow-like notebook environment using Docker. The image
+is based on the official Kubeflow notebook image (`jupyter-scipy`) with Kale
+pre-installed.
+
+```bash
+make docker-build   # Build wheels + Docker image
+make docker-run     # Start JupyterLab on http://localhost:8889
+```
+
+To connect to a KFP cluster, run these in separate terminals:
+
+```bash
+# Terminal 1: Serve the dev wheel (so compiled pipelines can install Kale)
+make kfp-serve
+
+# Terminal 2: Port-forward the KFP API
+kubectl port-forward -n kubeflow svc/ml-pipeline 8080:8888
+
+# Terminal 3: Start the container
+make docker-run
+```
+
+`make docker-run` automatically configures:
+- **KFP API** via `host.docker.internal` (works on macOS, Windows, and Linux)
+- **KFP UI links** pointing to `localhost:8080` (so pipeline links open in your browser)
+- **Wheel server** connectivity for compiled pipelines
+
+## FAQ
 
 Head over to [FAQ](FAQ.md) to read about some known issues and some of the
 limitations imposed by the Kale data marshalling model.
