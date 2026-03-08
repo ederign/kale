@@ -45,7 +45,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 labextension/lib/
-# labextension/jupyterlab-kubeflow-kale/
 labextension/static/
 labextension/package-lock.json
 

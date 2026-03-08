@@ -7,9 +7,9 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/kubeflow-kale/kale",
+  "homepage": "https://github.com/kubeflow/kale",
   "bugs": {
-    "url": "https://github.com/kubeflow-kale/kale/issues"
+    "url": "https://github.com/kubeflow/kale/issues"
   },
   "license": "Apache-2.0",
   "engines": {
@@ -29,7 +29,7 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kubeflow-kale/kale.git"
+    "url": "https://github.com/kubeflow/kale.git"
   },
   "scripts": {
     "build": "jlpm build:lib && jlpm build:labextension:dev",
