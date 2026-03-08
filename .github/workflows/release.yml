@@ -1,11 +1,16 @@
 name: Release
 
 on:
-  push:
-    branches: ["main", "release-*"]
-    paths:
-      - "kale/__init__.py"
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build and test without publishing'
+        type: boolean
+        default: true
+      publish_pypi:
+        description: 'Publish to production PyPI (requires production environment)'
+        type: boolean
+        default: false
 
 concurrency:
   group: release-${{ github.ref }}
@@ -146,6 +151,7 @@ jobs:
 
   create-tag:
     needs: [prepare, test-wheels]
+    if: ${{ inputs.dry_run == false }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -164,12 +170,11 @@ jobs:
             echo "Created and pushed tag $TAG"
           fi
 
-  publish-pypi:
+  publish-testpypi:
     needs: [prepare, create-tag]
+    if: ${{ inputs.dry_run == false }}
     runs-on: ubuntu-latest
     environment: release
-    permissions:
-      id-token: write
     steps:
       - name: Download wheel
         uses: actions/download-artifact@v4
@@ -185,8 +190,27 @@ jobs:
           password: ${{ secrets.TESTPYPI_API_TOKEN }}
           skip-existing: true
 
+  publish-pypi:
+    needs: [prepare, publish-testpypi]
+    if: ${{ inputs.dry_run == false && inputs.publish_pypi == true }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
   github-release:
-    needs: [prepare, publish-pypi]
+    needs: [prepare, publish-testpypi]
+    if: ${{ inputs.dry_run == false }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -207,3 +231,50 @@ jobs:
           prerelease: ${{ needs.prepare.outputs.prerelease == 'true' }}
           generate_release_notes: true
           files: dist/*
+
+  bump-dev-version:
+    needs: [prepare, publish-testpypi]
+    if: ${{ inputs.dry_run == false }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Compute next dev version
+        id: next
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          NEXT=$(python3 -c "
+          import re
+          v = '$VERSION'
+          m = re.match(r'(\d+\.\d+\.\d+)(a|b|rc)(\d+)$', v)
+          if m:
+              print(f'{m.group(1)}{m.group(2)}{int(m.group(3))+1}')
+          else:
+              parts = v.split('.')
+              parts[2] = str(int(parts[2]) + 1)
+              print('.'.join(parts) + 'a1')
+          ")
+          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "Released $VERSION → next dev version: $NEXT"
+
+      - name: Bump version
+        run: make release VERSION=${{ steps.next.outputs.next }}
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "Bump dev version to ${{ steps.next.outputs.next }}"
+          branch: bump-dev-version/${{ steps.next.outputs.next }}
+          title: "Bump dev version to ${{ steps.next.outputs.next }}"
+          body: "Automated version bump after releasing v${{ needs.prepare.outputs.version }}."
+          committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
