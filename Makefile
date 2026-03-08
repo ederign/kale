@@ -212,7 +212,7 @@ release: ## Set release version (usage: make release VERSION=X.Y.Z)
 		exit 1; \
 	}
 	@# Update version
-	sed -i '' 's/__version__ = ".*"/__version__ = "$(VERSION)"/' kale/__init__.py
+	python3 -c "import re; p='kale/__init__.py'; t=open(p).read(); open(p,'w').write(re.sub(r'__version__ = \".*\"', '__version__ = \"$(VERSION)\"', t))"
 	@# Convert PEP 440 to semver for package.json
 	@NPM_VERSION=$$(echo "$(VERSION)" | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+)(a)([0-9]+)/\1-alpha.\3/; s/([0-9]+\.[0-9]+\.[0-9]+)(b)([0-9]+)/\1-beta.\3/; s/([0-9]+\.[0-9]+\.[0-9]+)(rc)([0-9]+)/\1-rc.\3/'); \
 	cd labextension && npm version "$$NPM_VERSION" --no-git-tag-version --allow-same-version; \

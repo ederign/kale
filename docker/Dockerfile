@@ -18,7 +18,8 @@ FROM ${BASE_IMAGE}
 USER root
 
 COPY dist/*.whl /tmp/wheels/
-RUN pip install --no-cache-dir '/tmp/wheels/kubeflow_kale-*.whl[jupyter]' && \
+RUN WHEEL=$(ls /tmp/wheels/kubeflow_kale-*.whl) && \
+    pip install --no-cache-dir "${WHEEL}[jupyter]" && \
     rm -rf /tmp/wheels
 
 USER 1000
