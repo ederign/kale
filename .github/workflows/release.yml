@@ -74,6 +74,10 @@ jobs:
           SKIP_JUPYTER_BUILDER=1 uv sync --all-extras --frozen
           cd labextension && uv run jlpm install
 
+      - name: Build labextension
+        run: |
+          cd labextension && uv run jlpm build:prod
+
       - name: Check versions match
         run: make check-versions
 
