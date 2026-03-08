@@ -3,14 +3,14 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      dry_run:
-        description: 'Build and test without publishing'
-        type: boolean
-        default: true
-      publish_pypi:
-        description: 'Publish to production PyPI (requires production environment)'
-        type: boolean
-        default: false
+      target:
+        description: 'Release target'
+        type: choice
+        default: 'dry-run'
+        options:
+          - dry-run
+          - testpypi
+          - testpypi+pypi
 
 concurrency:
   group: release-${{ github.ref }}
@@ -151,7 +151,7 @@ jobs:
 
   create-tag:
     needs: [prepare, test-wheels]
-    if: ${{ inputs.dry_run == false }}
+    if: ${{ inputs.target != 'dry-run' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -172,7 +172,7 @@ jobs:
 
   publish-testpypi:
     needs: [prepare, create-tag]
-    if: ${{ inputs.dry_run == false }}
+    if: ${{ inputs.target != 'dry-run' }}
     runs-on: ubuntu-latest
     environment: release
     steps:
@@ -192,7 +192,7 @@ jobs:
 
   publish-pypi:
     needs: [prepare, publish-testpypi]
-    if: ${{ inputs.dry_run == false && inputs.publish_pypi == true }}
+    if: ${{ inputs.target == 'testpypi+pypi' }}
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -210,7 +210,7 @@ jobs:
 
   github-release:
     needs: [prepare, publish-testpypi]
-    if: ${{ inputs.dry_run == false }}
+    if: ${{ inputs.target != 'dry-run' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -234,7 +234,7 @@ jobs:
 
   bump-dev-version:
     needs: [prepare, publish-testpypi]
-    if: ${{ inputs.dry_run == false }}
+    if: ${{ inputs.target != 'dry-run' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
