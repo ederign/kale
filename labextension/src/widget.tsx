@@ -41,14 +41,14 @@ import { LabIcon } from '@jupyterlab/ui-components';
 
 /* tslint:disable */
 export const IKubeflowKale = new Token<IKubeflowKale>(
-  'kubeflow-kale-labextension:IKubeflowKale',
+  'jupyterlab-kubeflow-kale:IKubeflowKale',
 );
 
 export interface IKubeflowKale {
   widget: Widget;
 }
 
-const id = 'kubeflow-kale-labextension:deploymentPanel';
+const id = 'jupyterlab-kubeflow-kale:deploymentPanel';
 
 const kaleIcon = new LabIcon({ name: 'kale:logo', svgstr: kaleIconSvg });
 
@@ -141,7 +141,7 @@ async function activate(
         kernel={kernel}
       />,
     );
-    widget.id = 'kubeflow-kale-labextension/kubeflowDeployment';
+    widget.id = 'jupyterlab-kubeflow-kale/kubeflowDeployment';
     widget.title.icon = kaleIcon;
     widget.title.caption = 'Kubeflow Pipelines Deployment Panel';
     widget.node.classList.add('kale-panel');
