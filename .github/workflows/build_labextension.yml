@@ -32,10 +32,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: |
-          SKIP_JUPYTER_BUILDER=1 uv sync --all-extras --frozen
-          cd labextension && uv run jlpm install
+      - name: Set up development environment
+        run: make dev
 
       - name: Lint labextension
         run: make lint-labextension
@@ -61,17 +59,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: |
-          SKIP_JUPYTER_BUILDER=1 uv sync --all-extras --frozen
-          cd labextension && uv run jlpm install
+      - name: Set up development environment
+        run: make dev
 
-      - name: Build labextension
-        run: |
-          cd labextension && uv run jlpm build:prod
-
-      - name: Register extension for verification
-        run: uv run jupyter labextension develop --overwrite .
+      - name: Build wheel
+        run: make build
 
       - name: Verify extension
         run: |

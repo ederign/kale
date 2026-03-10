@@ -23,7 +23,6 @@ classifiers = [
 ]
 
 dependencies = [
-  "kfp>=2.0.0",
   "kfp[kubernetes]>=2.16.0",
   "autopep8>=2.0.0",
   "astor>=0.8.1",
@@ -76,7 +75,7 @@ path = "kale/__init__.py"
 
 [tool.hatch.build.targets.sdist]
 artifacts = ["jupyterlab_kubeflow_kale/labextension"]
-exclude = [".github", "binder"]
+exclude = [".github", "binder", ".venv*"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["kale", "jupyterlab_kubeflow_kale"]
