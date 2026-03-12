@@ -11,22 +11,33 @@ This document covers how to release `kubeflow-kale` to TestPyPI and PyPI.
 
 ## Version Bumping
 
-Set the version for both Python (PEP 440) and npm (semver) with a single command:
+For **sequential pre-releases** (e.g., `a1 → a2 → a3`), you don't need to manually
+bump — the workflow auto-bumps to the next pre-release after each publish (see
+[Bump dev version](#publishing)).
+
+**Manual bumping is only needed when changing the release stage:**
 
 ```bash
-make release VERSION=2.0.0a2
+# Alpha to beta
+make release VERSION=2.0.0b1
+
+# Beta to release candidate
+make release VERSION=2.0.0rc1
+
+# Release candidate to final
+make release VERSION=2.0.0
 ```
 
 This updates:
-- `kale/__init__.py` (`__version__ = "2.0.0a2"`)
-- `labextension/package.json` (`"version": "2.0.0-alpha.2"`)
+- `kale/__init__.py` (`__version__`)
+- `labextension/package.json` (`"version"`)
 - Generates a changelog (if git-cliff is installed)
 
 Commit the version bump:
 
 ```bash
 git add kale/__init__.py labextension/package.json CHANGELOG/
-git commit -s -m "Release v2.0.0a2"
+git commit -s -m "Release v2.0.0b1"
 git push
 ```
 
@@ -80,7 +91,7 @@ After the TestPyPI publish succeeds, validate the package before approving
 the production PyPI deployment:
 
 ```bash
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ kubeflow-kale==2.0.0a2
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ kubeflow-kale==2.0.0{Version}
 python -c "from kale import __version__; print(__version__)"
 kale --help
 ```
@@ -89,6 +100,33 @@ The `--extra-index-url` is needed because TestPyPI may not have all dependencies
 
 Once validated, go to the workflow run in GitHub Actions and approve the
 `production` environment deployment to publish to PyPI.
+
+## Release Branches
+
+For **pre-release versions** (alpha, beta, RC), release directly from `main`.
+There's no need to create separate branches — releases happen sequentially
+and the auto-bump keeps `main` ready for the next release.
+
+**Release branches are needed once you ship a stable release** and need to
+support patch releases while `main` moves on to new development:
+
+```bash
+# After releasing 2.0.0, create a release branch for patches
+git checkout -b release-2.0 main
+git push origin release-2.0
+
+# For a patch release (e.g., 2.0.1), cherry-pick fixes onto the branch
+git checkout release-2.0
+git cherry-pick <fix-commit>
+make release VERSION=2.0.1
+git commit -s -m "Release v2.0.1"
+git push origin release-2.0
+
+# Trigger the workflow from the release-2.0 branch
+```
+
+The release workflow works from any branch — just select the branch in the
+"Run workflow" dropdown.
 
 ## Testing from a Fork
 
