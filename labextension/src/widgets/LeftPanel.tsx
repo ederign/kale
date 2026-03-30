@@ -59,6 +59,8 @@ interface IProps {
   docManager: IDocumentManager;
   backend: boolean;
   kernel: Kernel.IKernelConnection;
+  enableKaleByDefault: boolean;
+  autoSaveOnCompileOrRun: boolean;
 }
 
 interface IState {
@@ -271,6 +273,17 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
     prevProps: Readonly<IProps>,
     prevState: Readonly<IState>,
   ) => {
+    // If the user has the setting enabled, we should allow Kale to turn on
+    // for the currently opened notebook without requiring a notebook switch.
+    // When the setting is turned off we keep the current toggle state.
+    if (
+      !prevProps.enableKaleByDefault &&
+      this.props.enableKaleByDefault &&
+      !this.state.isEnabled
+    ) {
+      this.setState({ isEnabled: true });
+    }
+
     // fast comparison of Metadata objects.
     // warning: this method does not work if keys change order.
     if (
@@ -301,6 +314,10 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
     // Set the current notebook and wait for the session to be ready
     if (notebook) {
       await this.setNotebookPanel(notebook);
+      const enableByDefault = this.props.enableKaleByDefault;
+      this.setState(prevState => ({
+        isEnabled: enableByDefault || prevState.isEnabled, // preserve toggle when setting off
+      }));
     } else {
       // Handle null case - reset to default state and disable
       this.setState(DefaultState);
@@ -494,18 +511,18 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
       return;
     }
 
-    // TODO: Check here
-    if (activeNotebook.model?.dirty) {
+    if (activeNotebook.model?.dirty && !this.props.autoSaveOnCompileOrRun) {
       const result = await NotebookUtils.showYesNoDialog('Unsaved Changes', [
         'Your current Notebook contains unsaved changes. Saving is required to proceed.',
         'Would you like to save now?',
       ]);
-      if (result) {
-        await activeNotebook.context.save();
-      } else {
+      if (!result) {
         this.setState({ runDeployment: false });
         return;
       }
+    }
+    if (activeNotebook.model?.dirty) {
+      await activeNotebook.context.save();
     }
 
     const commands = new Commands(activeNotebook, this.props.kernel);
@@ -718,6 +735,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
                   notebook={activeNotebook}
                   pipelineBaseImage={this.state.metadata.base_image}
                   defaultBaseImage={this.state.defaultBaseImage}
+                  initialChecked={this.state.isEnabled}
                 />
               ) : (
                 <>
