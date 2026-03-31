@@ -568,14 +568,14 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
     });
 
     // CREATE PIPELINE
-    const compileNotebook = await commands.compilePipeline(
+    const compileResult = await commands.compilePipeline(
       nbFilePath,
       metadata,
       this.props.docManager,
       this.state.deployDebugMessage,
       _updateDeployProgress,
     );
-    if (!compileNotebook) {
+    if (!compileResult.success) {
       this.setState({ runDeployment: false });
       return;
     }
@@ -588,8 +588,8 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
       this.state.deploymentType === 'upload' ||
       this.state.deploymentType === 'run'
         ? await commands.uploadPipeline(
-            compileNotebook.pipeline_package_path,
-            compileNotebook.pipeline_metadata,
+            compileResult.pipeline_package_path,
+            compileResult.pipeline_metadata,
             _updateDeployProgress,
           )
         : null;
@@ -614,8 +614,8 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
       const runPipeline = await commands.runPipeline(
         uploadPipeline.pipeline.pipelineid,
         uploadPipeline.pipeline.versionid,
-        compileNotebook.pipeline_metadata,
-        compileNotebook.pipeline_package_path,
+        compileResult.pipeline_metadata,
+        compileResult.pipeline_package_path,
         _updateDeployProgress,
       );
       if (runPipeline) {
@@ -654,6 +654,14 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
         experimentInputValue = selectedExperiments[0].name;
       }
     }
+    const pipelineNameValid = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/.test(
+      this.state.metadata.pipeline_name,
+    );
+    const experimentNameRegex = /^[a-z]([-a-z0-9]*[a-z0-9])?$/;
+    const experimentNameValid =
+      experimentInputSelected !== NEW_EXPERIMENT.id ||
+      experimentNameRegex.test(experimentInputValue);
+
     const experiment_name_input = (
       <ExperimentInput
         updateValue={this.updateExperiment}
@@ -804,6 +812,7 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
             <SplitDeployButton
               running={this.state.runDeployment}
               handleClick={this.activateRunDeployState}
+              disabled={!pipelineNameValid || !experimentNameValid}
             />
           </div>
         </div>

@@ -8490,7 +8490,6 @@ __metadata:
     stylelint-prettier: ^4.0.0
     typescript: ~5.9.2
     typescript-eslint: 8.44.1
-    use-debounce: ^10.0.5
     yjs: ^13.5.40
   languageName: unknown
   linkType: soft
@@ -11212,15 +11211,6 @@ __metadata:
     querystringify: ^2.1.1
     requires-port: ^1.0.0
   checksum: fbdba6b1d83336aca2216bbdc38ba658d9cfb8fc7f665eb8b17852de638ff7d1a162c198a8e4ed66001ddbf6c9888d41e4798912c62b4fd777a31657989f7bdf
-  languageName: node
-  linkType: hard
-
-"use-debounce@npm:^10.0.5":
-  version: 10.1.0
-  resolution: "use-debounce@npm:10.1.0"
-  peerDependencies:
-    react: "*"
-  checksum: 217a80a392cbd6bafb43cd52bc5579847d35c5df890f2b3689c527317bc610e8467f4c051e39180f825b6e8ee9e6fc777c09a214a9df4fff3dc72a1a9ee73853
   languageName: node
   linkType: hard
 
