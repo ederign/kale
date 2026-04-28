@@ -42,6 +42,7 @@ const KFP_STATUS_REFRESH_MS = 30_000;
 
 const KALE_NOTEBOOK_METADATA_KEY = 'kubeflow_notebook';
 const DEFAULT_UI_URL = 'http://localhost:8080';
+const PIPELINE_NAME_MAX_LENGTH = 124;
 
 export interface IExperiment {
   id: string;
@@ -654,9 +655,10 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
         experimentInputValue = selectedExperiments[0].name;
       }
     }
-    const pipelineNameValid = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/.test(
-      this.state.metadata.pipeline_name,
-    );
+    const pipelineNameValid =
+      /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/.test(
+        this.state.metadata.pipeline_name,
+      ) && this.state.metadata.pipeline_name.length <= PIPELINE_NAME_MAX_LENGTH;
     const experimentNameRegex = /^[a-z]([-a-z0-9]*[a-z0-9])?$/;
     const experimentNameValid =
       experimentInputSelected !== NEW_EXPERIMENT.id ||
@@ -683,6 +685,8 @@ export class KubeflowKaleLeftPanel extends React.Component<IProps, IState> {
         regexErrorMsg={
           "Pipeline name must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character."
         }
+        maxLength={PIPELINE_NAME_MAX_LENGTH}
+        maxLengthErrorMsg={`Pipeline name must be ${PIPELINE_NAME_MAX_LENGTH} characters or fewer.`}
       />
     );
 

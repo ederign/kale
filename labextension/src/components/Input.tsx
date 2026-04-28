@@ -38,6 +38,8 @@ export interface IInputProps extends Omit<
   value: string | number;
   regex?: string;
   regexErrorMsg?: string;
+  maxLength?: number;
+  maxLengthErrorMsg?: string;
   inputIndex?: number;
   helperText?: string;
   readOnly?: boolean;
@@ -54,6 +56,8 @@ export const Input: React.FunctionComponent<IInputProps> = props => {
     helperText = null,
     regex,
     regexErrorMsg,
+    maxLength,
+    maxLengthErrorMsg,
     validation,
     placeholder,
     inputIndex,
@@ -98,7 +102,19 @@ export const Input: React.FunctionComponent<IInputProps> = props => {
     regexPattern !== undefined && value !== ''
       ? !new RegExp(regexPattern).test(value)
       : false;
-  const error = regexError || beforeUpdateError;
+  const maxLengthError =
+    maxLength !== undefined ? value.length > maxLength : false;
+  const error = regexError || maxLengthError || beforeUpdateError;
+
+  const getErrorMessage = (): string | undefined => {
+    if (maxLengthError) {
+      return (
+        maxLengthErrorMsg ??
+        `Must be ${maxLength} characters or fewer (currently ${value.length})`
+      );
+    }
+    return getRegexMessage();
+  };
 
   const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = evt.target.value;
@@ -115,11 +131,20 @@ export const Input: React.FunctionComponent<IInputProps> = props => {
       variant={variant}
       className={className}
       error={error}
+      sx={
+        error
+          ? {
+              '& .MuiInputLabel-root': { color: 'error.main' },
+              '& .MuiInputBase-input': { color: 'error.main' },
+              '& .MuiFormHelperText-root': { color: 'error.main' },
+            }
+          : undefined
+      }
       value={value}
       margin="dense"
       placeholder={placeholder}
       spellCheck={false}
-      helperText={error ? getRegexMessage() : helperText}
+      helperText={error ? getErrorMessage() : helperText}
       slotProps={{
         input: {
           readOnly: readOnly,
