@@ -22,4 +22,13 @@ RUN WHEEL=$(ls /tmp/wheels/kubeflow_kale-*.whl) && \
     pip install --no-cache-dir "${WHEEL}[jupyter]" && \
     rm -rf /tmp/wheels
 
+# Built-in sample notebooks and catalog for disconnected environment support.
+# Only docker/Dockerfile produces KALE-enabled images (single variant).
+# The pip install above also installs these via wheel shared-data; the explicit
+# COPY provides defense-in-depth per KEP-0607.
+COPY examples/catalog/ /opt/conda/share/jupyter/kale/catalog/
+COPY examples/base/ /opt/conda/share/jupyter/kale/samples/base/
+COPY examples/titanic-ml-dataset/ /opt/conda/share/jupyter/kale/samples/titanic-ml-dataset/
+COPY examples/rag-pipeline/ /opt/conda/share/jupyter/kale/samples/rag-pipeline/
+
 USER 1000
