@@ -280,16 +280,17 @@ def check_sample_exists(request, sample_id, server_root=None):
 
 def load_example(request, sample_id, server_root=None, recreate=False):
     """Materialize a sample and return the notebook path."""
-    from kale.examples_catalog import materializer as mat
-
     try:
+        from kale.examples_catalog import materializer as mat
+
         if recreate:
             notebook_path = mat.recreate(sample_id, server_root)
         else:
             notebook_path = mat.materialize(sample_id, server_root)
         return {"notebook_path": notebook_path}
     except ValueError as e:
+        request.log.exception("Sample error for '%s': %s", sample_id, e)
         raise RPCNotFoundError(details=str(e), trans_id=request.trans_id)
     except Exception as e:
-        request.log.exception("Error loading example '%s': %s", sample_id, e)
-        raise
+        request.log.exception("Failed to load example '%s': %s", sample_id, e)
+        raise RPCInternalError(details=str(e), trans_id=request.trans_id)

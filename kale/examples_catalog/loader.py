@@ -21,7 +21,7 @@ import yaml
 log = logging.getLogger(__name__)
 
 CATALOG_API_VERSION = "kale.kubeflow.org/v2alpha1"
-EXPECTED_KIND = "ExamplesCatalog"
+CATALOG_KIND = "ExamplesCatalog"
 VALID_DIFFICULTIES = {"beginner", "intermediate", "advanced"}
 REQUIRED_FIELDS = {"id", "title", "description"}
 CATALOG_SUBDIR = os.path.join("kale", "catalog")
@@ -47,7 +47,7 @@ def validate_entry(entry, data_dir):
         return False, "entry is not a dict"
 
     for field in REQUIRED_FIELDS:
-        if field not in entry or not entry[field]:
+        if field not in entry or not isinstance(entry[field], str) or not entry[field]:
             return False, f"missing required field '{field}'"
 
     assets = entry.get("assets")
@@ -102,7 +102,7 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
 
         data_dirs = jupyter_path()
 
-    seen_ids = set()
+    seen_ids = {}  # id -> (data_dir, index in entries list)
     entries = []
 
     for data_dir in data_dirs:
@@ -110,20 +110,26 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
         if not os.path.isdir(catalog_dir):
             continue
 
-        yaml_files = sorted(glob.glob(os.path.join(catalog_dir, "*.yaml")))
+        yaml_files = sorted(
+            glob.glob(os.path.join(catalog_dir, "*.yaml"))
+            + glob.glob(os.path.join(catalog_dir, "*.yml"))
+        )
         for yaml_file in yaml_files:
             try:
                 with open(yaml_file) as f:
                     doc = yaml.safe_load(f)
             except Exception:
-                log.warning("Failed to parse YAML file '%s', skipping", yaml_file)
+                log.warning(
+                    "Skipping %s: invalid YAML", yaml_file, exc_info=True
+                )
                 continue
 
             if not isinstance(doc, dict):
+                log.warning("Skipping %s: not a YAML mapping", yaml_file)
                 continue
 
             kind = doc.get("kind")
-            if kind != EXPECTED_KIND:
+            if kind != CATALOG_KIND:
                 continue
 
             api_version = doc.get("apiVersion")
@@ -149,10 +155,6 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
                     continue
 
                 sample_id = item["id"]
-                if sample_id in seen_ids:
-                    continue
-
-                seen_ids.add(sample_id)
                 entry = {
                     "id": sample_id,
                     "title": item["title"],
@@ -164,8 +166,19 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
                 }
                 if _keep_source_dir:
                     source = item["assets"]["source"]
-                    entry["_source_dir"] = os.path.join(data_dir, SAMPLES_SUBDIR, source)
-                entries.append(entry)
+                    entry["_source_dir"] = os.path.join(
+                        data_dir, SAMPLES_SUBDIR, source
+                    )
+
+                if sample_id in seen_ids:
+                    prev_dir, prev_idx = seen_ids[sample_id]
+                    if prev_dir == data_dir:
+                        # Same data_dir: later file wins (overwrite)
+                        entries[prev_idx] = entry
+                    # Different data_dir: higher-priority (earlier) dir wins, skip
+                else:
+                    seen_ids[sample_id] = (data_dir, len(entries))
+                    entries.append(entry)
 
     return entries
 

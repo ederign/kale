@@ -146,17 +146,75 @@ class TestDiscoverExamples:
         assert len(result) == 1
         assert result[0]["title"] == "High Priority"
 
-    def test_wrong_kind_skipped(self, tmp_path):
+    def test_wrong_kind_skipped(self, tmp_path, caplog):
         data_dir = str(tmp_path / "data")
         _make_catalog_structure(data_dir, [_valid_item()], kind="OtherKind")
-        result = loader.discover_examples(data_dirs=[data_dir])
+        with caplog.at_level("WARNING", logger="kale.examples_catalog.loader"):
+            result = loader.discover_examples(data_dirs=[data_dir])
         assert result == []
+        # Wrong kind is silently skipped -- no warning should be logged
+        assert not any("OtherKind" in r.message for r in caplog.records)
+
+    def test_unknown_api_version_skipped(self, tmp_path, caplog):
+        data_dir = str(tmp_path / "data")
+        catalog_dir = os.path.join(data_dir, "kale", "catalog")
+        samples_dir = os.path.join(data_dir, "kale", "samples", "test-sample")
+        os.makedirs(catalog_dir)
+        os.makedirs(samples_dir)
+        doc = {
+            "apiVersion": "unknown/v1",
+            "kind": "ExamplesCatalog",
+            "items": [_valid_item()],
+        }
+        with open(os.path.join(catalog_dir, "catalog.yaml"), "w") as f:
+            yaml.dump(doc, f)
+        with caplog.at_level("WARNING", logger="kale.examples_catalog.loader"):
+            result = loader.discover_examples(data_dirs=[data_dir])
+        assert result == []
+        assert any("unknown apiVersion" in r.message for r in caplog.records)
+
+    def test_yml_extension_discovered(self, tmp_path):
+        data_dir = str(tmp_path / "data")
+        _make_catalog_structure(
+            data_dir, [_valid_item("yml-sample")], filename="catalog.yml"
+        )
+        result = loader.discover_examples(data_dirs=[data_dir])
+        assert len(result) == 1
+        assert result[0]["id"] == "yml-sample"
 
     def test_invalid_difficulty(self, tmp_path):
         data_dir = str(tmp_path / "data")
         _make_catalog_structure(data_dir, [_valid_item(difficulty="expert")])
         result = loader.discover_examples(data_dirs=[data_dir])
         assert result == []
+
+    def test_defaults_tags_empty_difficulty_none(self, tmp_path):
+        data_dir = str(tmp_path / "data")
+        item = {
+            "id": "minimal-sample",
+            "title": "Minimal",
+            "description": "No tags or difficulty",
+            "assets": {"source": "minimal-sample"},
+            "entrypoint": {"notebook": "main.ipynb"},
+        }
+        _make_catalog_structure(data_dir, [item])
+        result = loader.discover_examples(data_dirs=[data_dir])
+        assert len(result) == 1
+        assert result[0]["tags"] == []
+        assert result[0]["difficulty"] is None
+
+    def test_same_dir_duplicate_last_wins(self, tmp_path):
+        data_dir = str(tmp_path / "data")
+        _make_catalog_structure(
+            data_dir, [_valid_item("dup", title="From A")], filename="a.yaml"
+        )
+        _make_catalog_structure(
+            data_dir, [_valid_item("dup", title="From B")], filename="b.yaml"
+        )
+        result = loader.discover_examples(data_dirs=[data_dir])
+        assert len(result) == 1
+        # b.yaml comes after a.yaml alphabetically, so "From B" should win
+        assert result[0]["title"] == "From B"
 
     def test_valid_with_invalid(self, tmp_path):
         data_dir = str(tmp_path / "data")
@@ -182,10 +240,65 @@ class TestValidateEntry:
         valid, reason = loader.validate_entry(_valid_item(sample_id="a/b"), data_dir)
         assert not valid
 
+    def test_missing_assets_source(self, tmp_path):
+        data_dir = str(tmp_path)
+        item = {
+            "id": "no-assets",
+            "title": "No Assets",
+            "description": "Missing assets dict",
+        }
+        valid, reason = loader.validate_entry(item, data_dir)
+        assert not valid
+        assert "assets.source" in reason
+
+    def test_missing_entrypoint_notebook(self, tmp_path):
+        data_dir = str(tmp_path)
+        samples_dir = os.path.join(data_dir, "kale", "samples", "src")
+        os.makedirs(samples_dir, exist_ok=True)
+        item = {
+            "id": "no-entrypoint",
+            "title": "No Entrypoint",
+            "description": "Missing entrypoint dict",
+            "assets": {"source": "src"},
+        }
+        valid, reason = loader.validate_entry(item, data_dir)
+        assert not valid
+        assert "entrypoint.notebook" in reason
+
+    def test_non_string_required_field_rejected(self, tmp_path):
+        data_dir = str(tmp_path)
+        item = _valid_item()
+        item["id"] = 123  # non-string truthy value
+        valid, reason = loader.validate_entry(item, data_dir)
+        assert not valid
+        assert "missing required field" in reason
+
     def test_path_traversal_source(self, tmp_path):
         data_dir = str(tmp_path)
         item = _valid_item()
         item["assets"]["source"] = "../etc"
+        valid, reason = loader.validate_entry(item, data_dir)
+        assert not valid
+        assert "path traversal" in reason
+
+    def test_path_traversal_id_backslash(self, tmp_path):
+        data_dir = str(tmp_path)
+        valid, reason = loader.validate_entry(_valid_item(sample_id="foo\\bar"), data_dir)
+        assert not valid
+        assert "path separators" in reason or "\\" in reason
+
+    def test_absolute_path_source(self, tmp_path):
+        data_dir = str(tmp_path)
+        item = _valid_item()
+        item["assets"]["source"] = "/etc/passwd"
+        valid, reason = loader.validate_entry(item, data_dir)
+        assert not valid
+        assert "path traversal" in reason
+
+    def test_absolute_path_notebook(self, tmp_path):
+        data_dir = str(tmp_path)
+        item = _valid_item()
+        item["entrypoint"]["notebook"] = "/etc/passwd"
         valid, reason = loader.validate_entry(item, data_dir)
         assert not valid
         assert "path traversal" in reason
@@ -263,8 +376,13 @@ class TestMaterialize:
         with open(provenance_path) as f:
             prov = json.load(f)
         assert prov["sample_id"] == "my-sample"
-        assert "source_path" in prov
-        assert "timestamp" in prov
+        # source_path should point to the actual sample directory
+        expected_source = os.path.join(data_dir, "kale", "samples", "my-sample")
+        assert prov["source_path"] == expected_source
+        # timestamp should be a valid ISO 8601 string
+        from datetime import datetime
+
+        datetime.fromisoformat(prov["timestamp"])
 
     def test_relative_path(self, tmp_path):
         data_dir = str(tmp_path / "data")
