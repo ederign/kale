@@ -1,4 +1,4 @@
-.PHONY: help dev install \
+.PHONY: help dev install dev-samples \
         test test-backend test-backend-unit test-labextension test-e2e test-e2e-install \
         lint lint-backend lint-labextension format-labextension format-backend \
         build \
@@ -53,9 +53,24 @@ dev: check-uv ## Set up development environment
 		printf "$(YELLOW)Note: pre-commit hooks not installed (core.hooksPath is set globally).\n$(NC)"; \
 		printf "$(YELLOW)To enable pre-commit hooks, run: git config --unset core.hooksPath\n$(NC)"; \
 	}
+	@# Step 5: Link sample notebooks for catalog development
+	@$(MAKE) dev-samples
 	@printf "$(GREEN)Setup complete! Run 'make jupyter' to start JupyterLab\n$(NC)"
 
 install: dev ## Alias for dev
+
+dev-samples: check-uv ## Link sample notebooks for development
+	@printf "$(BLUE)Linking sample notebooks for development...\n$(NC)"
+	@DATA_DIR=$$($(UV) run python -c "from jupyter_core.paths import jupyter_path; print(jupyter_path()[0])") && \
+	mkdir -p "$$DATA_DIR/kale/catalog" "$$DATA_DIR/kale/samples" && \
+	for f in examples/catalog/*.yaml; do \
+		ln -sf "$$(pwd)/$$f" "$$DATA_DIR/kale/catalog/$$(basename $$f)"; \
+	done && \
+	for d in examples/base examples/titanic-ml-dataset examples/rag-pipeline; do \
+		name=$$(basename "$$d") && \
+		ln -sfn "$$(pwd)/$$d" "$$DATA_DIR/kale/samples/$$name"; \
+	done
+	@printf "$(GREEN)Samples linked! Run 'make jupyter' to browse them in the catalog.\n$(NC)"
 
 ##@ Testing
 
