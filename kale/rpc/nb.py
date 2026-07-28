@@ -258,16 +258,24 @@ def get_security_context_defaults(request):
 
 def list_examples(request):
     """Discover and return all catalog examples."""
-    from kale.examples_catalog import discover_examples
+    try:
+        from kale.examples_catalog import discover_examples
 
-    return discover_examples()
+        return discover_examples()
+    except Exception as e:
+        request.log.exception("Failed to discover examples: %s", e)
+        raise RPCInternalError(details=str(e), trans_id=request.trans_id)
 
 
 def check_sample_exists(request, sample_id, server_root=None):
     """Check if a sample has been previously materialized."""
-    from kale.examples_catalog import check_existing
+    try:
+        from kale.examples_catalog import check_existing
 
-    return {"exists": check_existing(sample_id, server_root)}
+        return {"exists": check_existing(sample_id, server_root)}
+    except Exception as e:
+        request.log.exception("Failed to check sample existence: %s", e)
+        raise RPCInternalError(details=str(e), trans_id=request.trans_id)
 
 
 def load_example(request, sample_id, server_root=None, recreate=False):

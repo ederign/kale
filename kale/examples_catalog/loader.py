@@ -20,9 +20,12 @@ import yaml
 
 log = logging.getLogger(__name__)
 
+CATALOG_API_VERSION = "kale.kubeflow.org/v2alpha1"
 EXPECTED_KIND = "ExamplesCatalog"
 VALID_DIFFICULTIES = {"beginner", "intermediate", "advanced"}
 REQUIRED_FIELDS = {"id", "title", "description"}
+CATALOG_SUBDIR = os.path.join("kale", "catalog")
+SAMPLES_SUBDIR = os.path.join("kale", "samples")
 
 
 def _has_path_traversal(value):
@@ -71,7 +74,10 @@ def validate_entry(entry, data_dir):
     if difficulty is not None and difficulty not in VALID_DIFFICULTIES:
         return False, f"invalid difficulty '{difficulty}'"
 
-    sample_dir = os.path.join(data_dir, "kale", "samples", source)
+    if "tags" in entry and not isinstance(entry["tags"], list):
+        return False, "tags must be a list"
+
+    sample_dir = os.path.join(data_dir, SAMPLES_SUBDIR, source)
     if not os.path.isdir(sample_dir):
         return False, f"sample directory '{sample_dir}' does not exist"
 
@@ -100,7 +106,7 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
     entries = []
 
     for data_dir in data_dirs:
-        catalog_dir = os.path.join(data_dir, "kale", "catalog")
+        catalog_dir = os.path.join(data_dir, CATALOG_SUBDIR)
         if not os.path.isdir(catalog_dir):
             continue
 
@@ -118,6 +124,13 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
 
             kind = doc.get("kind")
             if kind != EXPECTED_KIND:
+                continue
+
+            api_version = doc.get("apiVersion")
+            if api_version != CATALOG_API_VERSION:
+                log.warning(
+                    "Skipping %s: unknown apiVersion %s", yaml_file, api_version
+                )
                 continue
 
             items = doc.get("items", [])
@@ -151,7 +164,7 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
                 }
                 if _keep_source_dir:
                     source = item["assets"]["source"]
-                    entry["_source_dir"] = os.path.join(data_dir, "kale", "samples", source)
+                    entry["_source_dir"] = os.path.join(data_dir, SAMPLES_SUBDIR, source)
                 entries.append(entry)
 
     return entries

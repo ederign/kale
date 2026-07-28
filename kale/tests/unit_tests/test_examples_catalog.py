@@ -290,12 +290,28 @@ class TestMaterialize:
         os.makedirs(server_root)
 
         materializer.materialize("my-sample", server_root=server_root, data_dirs=[data_dir])
+
+        provenance_path = os.path.join(
+            server_root, "kale-samples", "my-sample", ".kale-sample.json"
+        )
+        with open(provenance_path) as f:
+            first_prov = json.load(f)
+        first_ts = first_prov["timestamp"]
+
         marker = os.path.join(server_root, "kale-samples", "my-sample", "marker.txt")
         with open(marker, "w") as f:
             f.write("user data")
 
+        import time
+
+        time.sleep(0.01)
         materializer.materialize("my-sample", server_root=server_root, data_dirs=[data_dir])
         assert os.path.isfile(marker), "existing files should not be overwritten"
+
+        with open(provenance_path) as f:
+            second_prov = json.load(f)
+        second_ts = second_prov["timestamp"]
+        assert second_ts > first_ts, "provenance timestamp should be updated"
 
     def test_with_server_root(self, tmp_path):
         data_dir = str(tmp_path / "data")
@@ -349,14 +365,33 @@ class TestRecreate:
         assert os.path.isdir(os.path.join(server_root, "kale-samples", "my-sample"))
 
 
+class TestPathTraversalProtection:
+    """Test that materializer functions reject path traversal sample IDs."""
+
+    def test_materialize_rejects_traversal(self, tmp_path):
+        with pytest.raises(ValueError):
+            materializer.materialize("../escape", server_root=str(tmp_path))
+
+    def test_recreate_rejects_traversal(self, tmp_path):
+        with pytest.raises(ValueError, match="path separators"):
+            materializer.recreate("../escape", server_root=str(tmp_path))
+
+    def test_check_existing_rejects_traversal(self, tmp_path):
+        with pytest.raises(ValueError, match="path separators"):
+            materializer.check_existing("../escape", server_root=str(tmp_path))
+
+    def test_materialize_rejects_slash(self, tmp_path):
+        with pytest.raises(ValueError):
+            materializer.materialize("a/b", server_root=str(tmp_path))
+
+    def test_check_existing_rejects_slash(self, tmp_path):
+        with pytest.raises(ValueError, match="path separators"):
+            materializer.check_existing("a/b", server_root=str(tmp_path))
+
+
 # ---------------------------------------------------------------------------
 # RPC endpoint tests
 # ---------------------------------------------------------------------------
-
-
-@pytest.fixture(scope="module")
-def _rpc_request():
-    return None
 
 
 class TestRPCEndpoints:
@@ -366,6 +401,13 @@ class TestRPCEndpoints:
         with patch("jupyter_core.paths.jupyter_path", return_value=[data_dir]):
             result = nb.list_examples(None)
         assert len(result) == 2
+        expected_keys = {"id", "title", "description", "tags", "difficulty", "assets", "entrypoint"}
+        for entry in result:
+            assert set(entry.keys()) == expected_keys, (
+                f"entry keys {set(entry.keys())} != {expected_keys}"
+            )
+            # No internal underscore-prefixed keys should be present
+            assert not any(k.startswith("_") for k in entry)
 
     def test_check_sample_exists_true(self, tmp_path):
         dest = tmp_path / "kale-samples" / "my-sample"
@@ -387,6 +429,29 @@ class TestRPCEndpoints:
             result = nb.load_example(None, "my-sample", server_root=server_root)
         assert "notebook_path" in result
         assert "my-sample" in result["notebook_path"]
+
+    def test_load_example_recreate(self, tmp_path):
+        data_dir = str(tmp_path / "data")
+        _make_catalog_structure(data_dir, [_valid_item("my-sample")])
+        server_root = str(tmp_path / "workspace")
+        os.makedirs(server_root)
+
+        # First materialize
+        with patch("jupyter_core.paths.jupyter_path", return_value=[data_dir]):
+            nb.load_example(None, "my-sample", server_root=server_root)
+
+        # Add a marker file
+        marker = os.path.join(server_root, "kale-samples", "my-sample", "marker.txt")
+        with open(marker, "w") as f:
+            f.write("old data")
+
+        # Recreate should remove marker
+        with patch("jupyter_core.paths.jupyter_path", return_value=[data_dir]):
+            result = nb.load_example(
+                None, "my-sample", server_root=server_root, recreate=True
+            )
+        assert "notebook_path" in result
+        assert not os.path.isfile(marker), "marker should be gone after recreate"
 
     def test_load_example_not_found(self, tmp_path):
         class FakeRequest:

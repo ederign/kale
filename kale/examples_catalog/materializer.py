@@ -39,7 +39,8 @@ def _validate_sample_id(sample_id):
 
 
 def _get_sample_dest(sample_id, server_root=None):
-    base = server_root if server_root else os.path.expanduser("~")
+    _validate_sample_id(sample_id)
+    base = os.path.expanduser(server_root) if server_root else os.path.expanduser("~")
     mat_dir = _get_materialization_dir()
     return os.path.join(base, mat_dir, sample_id)
 
@@ -67,8 +68,6 @@ def materialize(sample_id, server_root=None, data_dirs=None):
     If the sample is already materialized, updates the provenance timestamp
     without copying files (Open Existing flow).
     """
-    _validate_sample_id(sample_id)
-
     result = loader.resolve_sample_dir(sample_id, data_dirs)
     if result is None:
         raise ValueError(f"Sample '{sample_id}' not found in any catalog")
