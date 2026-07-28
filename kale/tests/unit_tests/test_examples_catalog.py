@@ -227,6 +227,31 @@ class TestDiscoverExamples:
         assert len(result) == 1
         assert result[0]["id"] == "good-sample"
 
+    def test_non_dict_item_in_catalog_skipped(self, tmp_path):
+        """Non-dict items in the catalog items list are skipped."""
+        data_dir = str(tmp_path / "data")
+        catalog_dir = os.path.join(data_dir, "kale", "catalog")
+        samples_dir = os.path.join(data_dir, "kale", "samples", "valid-sample")
+        os.makedirs(catalog_dir)
+        os.makedirs(samples_dir)
+        with open(os.path.join(samples_dir, "main.ipynb"), "w") as f:
+            f.write("{}")
+
+        doc = {
+            "apiVersion": "kale.kubeflow.org/v2alpha1",
+            "kind": "ExamplesCatalog",
+            "items": [
+                "just-a-bare-string",
+                _valid_item("valid-sample"),
+            ],
+        }
+        with open(os.path.join(catalog_dir, "catalog.yaml"), "w") as f:
+            yaml.dump(doc, f)
+
+        result = loader.discover_examples(data_dirs=[data_dir])
+        assert len(result) == 1
+        assert result[0]["id"] == "valid-sample"
+
 
 class TestValidateEntry:
     def test_path_traversal_id(self, tmp_path):
@@ -310,6 +335,20 @@ class TestValidateEntry:
         valid, reason = loader.validate_entry(item, data_dir)
         assert not valid
         assert "path traversal" in reason
+
+    def test_non_list_tags_rejected(self, tmp_path):
+        """A non-list tags value is rejected with an appropriate message."""
+        data_dir = str(tmp_path)
+        samples_dir = os.path.join(data_dir, "kale", "samples", "test-sample")
+        os.makedirs(samples_dir, exist_ok=True)
+        with open(os.path.join(samples_dir, "main.ipynb"), "w") as f:
+            f.write("{}")
+
+        item = _valid_item()
+        item["tags"] = "single-tag"  # string instead of list
+        valid, reason = loader.validate_entry(item, data_dir)
+        assert not valid
+        assert "tags must be a list" in reason
 
 
 class TestResolveSampleDir:
@@ -465,6 +504,31 @@ class TestMaterialize:
         )
         assert "kale-samples" in result
 
+    def test_materialize_preserves_subdirectories(self, tmp_path):
+        """Nested subdirectories in sample source are preserved after materialization."""
+        data_dir = str(tmp_path / "data")
+        _make_catalog_structure(data_dir, [_valid_item("nested-sample")])
+
+        # Create nested subdirectory structure in the sample source
+        sample_src = os.path.join(data_dir, "kale", "samples", "nested-sample")
+        nested_dir = os.path.join(sample_src, "data", "train")
+        os.makedirs(nested_dir)
+        with open(os.path.join(nested_dir, "input.csv"), "w") as f:
+            f.write("col1,col2\n1,2\n")
+
+        server_root = str(tmp_path / "workspace")
+        os.makedirs(server_root)
+
+        materializer.materialize(
+            "nested-sample", server_root=server_root, data_dirs=[data_dir]
+        )
+
+        dest = os.path.join(server_root, "kale-samples", "nested-sample")
+        assert os.path.isdir(os.path.join(dest, "data", "train"))
+        assert os.path.isfile(os.path.join(dest, "data", "train", "input.csv"))
+        with open(os.path.join(dest, "data", "train", "input.csv")) as f:
+            assert f.read() == "col1,col2\n1,2\n"
+
 
 class TestRecreate:
     def test_replaces_existing(self, tmp_path):
@@ -482,12 +546,40 @@ class TestRecreate:
         assert not os.path.isfile(marker), "marker should be gone after recreate"
         assert os.path.isdir(os.path.join(server_root, "kale-samples", "my-sample"))
 
+    def test_recreate_from_scratch(self, tmp_path):
+        """Recreate works when no prior materialization exists."""
+        data_dir = str(tmp_path / "data")
+        _make_catalog_structure(data_dir, [_valid_item("fresh-sample")])
+        server_root = str(tmp_path / "workspace")
+        os.makedirs(server_root)
+
+        # Ensure no prior materialization exists
+        dest = os.path.join(server_root, "kale-samples", "fresh-sample")
+        assert not os.path.exists(dest)
+
+        result = materializer.recreate(
+            "fresh-sample", server_root=server_root, data_dirs=[data_dir]
+        )
+
+        # Verify materialization happened correctly
+        assert os.path.isdir(dest)
+        assert os.path.isfile(os.path.join(dest, "main.ipynb"))
+        assert "fresh-sample" in result
+        assert "main.ipynb" in result
+
+        # Verify provenance written
+        provenance_path = os.path.join(dest, ".kale-sample.json")
+        assert os.path.isfile(provenance_path)
+        with open(provenance_path) as f:
+            prov = json.load(f)
+        assert prov["sample_id"] == "fresh-sample"
+
 
 class TestPathTraversalProtection:
     """Test that materializer functions reject path traversal sample IDs."""
 
     def test_materialize_rejects_traversal(self, tmp_path):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="not found"):
             materializer.materialize("../escape", server_root=str(tmp_path))
 
     def test_recreate_rejects_traversal(self, tmp_path):

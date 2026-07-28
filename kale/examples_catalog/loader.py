@@ -53,10 +53,14 @@ def validate_entry(entry, data_dir):
     assets = entry.get("assets")
     if not isinstance(assets, dict) or "source" not in assets:
         return False, "missing required field 'assets.source'"
+    if not isinstance(assets["source"], str):
+        return False, "assets.source must be a string"
 
     entrypoint = entry.get("entrypoint")
     if not isinstance(entrypoint, dict) or "notebook" not in entrypoint:
         return False, "missing required field 'entrypoint.notebook'"
+    if not isinstance(entrypoint["notebook"], str):
+        return False, "entrypoint.notebook must be a string"
 
     sample_id = entry["id"]
     if _has_id_traversal(sample_id):
