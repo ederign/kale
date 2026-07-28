@@ -1,0 +1,13 @@
+apiVersion: kale.kubeflow.org/v2alpha1
+kind: ExamplesCatalog
+
+items:
+  - id: rag-pipeline
+    title: "RAG Pipeline"
+    description: "An advanced example demonstrating Retrieval-Augmented Generation patterns. Builds a document index, performs similarity search, and generates context-aware responses using a Kale pipeline."
+    tags: [genai, rag, advanced]
+    difficulty: advanced
+    assets:
+      source: "rag-pipeline"
+    entrypoint:
+      notebook: "rag_pipeline.ipynb"
