@@ -76,7 +76,9 @@ export const ExamplesDialog: React.FC<IExamplesDialogProps> = ({
       })
       .catch((err: unknown) => {
         const message =
-          err instanceof Error ? err.message : 'Failed to load examples catalog.';
+          err instanceof Error
+            ? err.message
+            : 'Failed to load examples catalog.';
         setError(message);
         setLoading(false);
       });

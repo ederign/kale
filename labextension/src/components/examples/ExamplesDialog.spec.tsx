@@ -232,7 +232,9 @@ describe('ExamplesDialog', () => {
       mockedExecuteRpc
         .mockResolvedValueOnce(sampleEntries)
         .mockResolvedValueOnce({ exists: false })
-        .mockResolvedValueOnce({ notebook_path: '/home/jovyan/intro-ml.ipynb' });
+        .mockResolvedValueOnce({
+          notebook_path: '/home/jovyan/intro-ml.ipynb',
+        });
 
       render(
         <ExamplesDialog
