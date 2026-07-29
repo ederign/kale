@@ -1,0 +1,23 @@
+apiVersion: kale.kubeflow.org/v2alpha1
+kind: ExamplesCatalog
+
+items:
+  - id: candies-sharing
+    title: "Candies Sharing"
+    description: "A minimal example showing how Kale converts a Notebook to a pipeline using notebook annotations. Variables become pipeline parameters and cells become pipeline steps."
+    tags: [starter, pipelines]
+    difficulty: beginner
+    assets:
+      source: "base"
+    entrypoint:
+      notebook: "candies_sharing.ipynb"
+
+  - id: titanic-ml-dataset
+    title: "Titanic ML Dataset"
+    description: "An intermediate machine learning example using the Titanic dataset. Covers data loading, feature engineering, model training with multiple classifiers, and evaluation."
+    tags: [ml, classification, pandas]
+    difficulty: intermediate
+    assets:
+      source: "titanic-ml-dataset"
+    entrypoint:
+      notebook: "titanic_dataset_ml.ipynb"

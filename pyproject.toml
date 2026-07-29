@@ -39,6 +39,7 @@ dependencies = [
   "notebook>=7.4.4",
   "packaging>=25.0",
   "progress>=1.5",
+  "pyyaml>=6.0",
   "kubernetes>=30.0.0",
 ]
 
@@ -90,6 +91,10 @@ packages = ["kale", "jupyterlab_kubeflow_kale"]
 [tool.hatch.build.targets.wheel.shared-data]
 "jupyterlab_kubeflow_kale/labextension" = "share/jupyter/labextensions/jupyterlab-kubeflow-kale"
 "labextension/jupyter-config/server-config" = "etc/jupyter/jupyter_server_config.d"
+"examples/catalog" = "share/jupyter/kale/catalog"
+"examples/base" = "share/jupyter/kale/samples/base"
+"examples/titanic-ml-dataset" = "share/jupyter/kale/samples/titanic-ml-dataset"
+"examples/rag-pipeline" = "share/jupyter/kale/samples/rag-pipeline"
 
 [tool.hatch.build.hooks.jupyter-builder]
 dependencies = ["hatch-jupyter-builder>=0.5"]
