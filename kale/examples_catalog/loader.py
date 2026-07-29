@@ -123,9 +123,7 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
                 with open(yaml_file) as f:
                     doc = yaml.safe_load(f)
             except Exception:
-                log.warning(
-                    "Skipping %s: invalid YAML", yaml_file, exc_info=True
-                )
+                log.warning("Skipping %s: invalid YAML", yaml_file, exc_info=True)
                 continue
 
             if not isinstance(doc, dict):
@@ -138,9 +136,7 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
 
             api_version = doc.get("apiVersion")
             if api_version != CATALOG_API_VERSION:
-                log.warning(
-                    "Skipping %s: unknown apiVersion %s", yaml_file, api_version
-                )
+                log.warning("Skipping %s: unknown apiVersion %s", yaml_file, api_version)
                 continue
 
             items = doc.get("items", [])
@@ -170,9 +166,7 @@ def discover_examples(data_dirs=None, _keep_source_dir=False):
                 }
                 if _keep_source_dir:
                     source = item["assets"]["source"]
-                    entry["_source_dir"] = os.path.join(
-                        data_dir, SAMPLES_SUBDIR, source
-                    )
+                    entry["_source_dir"] = os.path.join(data_dir, SAMPLES_SUBDIR, source)
 
                 if sample_id in seen_ids:
                     prev_dir, prev_idx = seen_ids[sample_id]

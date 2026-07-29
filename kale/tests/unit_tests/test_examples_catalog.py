@@ -155,7 +155,7 @@ class TestDiscoverExamples:
         # Wrong kind is silently skipped -- no warning should be logged
         assert not any("OtherKind" in r.message for r in caplog.records)
 
-    def test_unknown_api_version_skipped(self, tmp_path, caplog):
+    def test_unknown_api_version_skipped(self, tmp_path, capfd):
         data_dir = str(tmp_path / "data")
         catalog_dir = os.path.join(data_dir, "kale", "catalog")
         samples_dir = os.path.join(data_dir, "kale", "samples", "test-sample")
@@ -168,16 +168,14 @@ class TestDiscoverExamples:
         }
         with open(os.path.join(catalog_dir, "catalog.yaml"), "w") as f:
             yaml.dump(doc, f)
-        with caplog.at_level("WARNING", logger="kale.examples_catalog.loader"):
-            result = loader.discover_examples(data_dirs=[data_dir])
+        result = loader.discover_examples(data_dirs=[data_dir])
         assert result == []
-        assert any("unknown apiVersion" in r.message for r in caplog.records)
+        captured = capfd.readouterr()
+        assert "unknown apiVersion" in captured.err
 
     def test_yml_extension_discovered(self, tmp_path):
         data_dir = str(tmp_path / "data")
-        _make_catalog_structure(
-            data_dir, [_valid_item("yml-sample")], filename="catalog.yml"
-        )
+        _make_catalog_structure(data_dir, [_valid_item("yml-sample")], filename="catalog.yml")
         result = loader.discover_examples(data_dirs=[data_dir])
         assert len(result) == 1
         assert result[0]["id"] == "yml-sample"
@@ -205,12 +203,8 @@ class TestDiscoverExamples:
 
     def test_same_dir_duplicate_last_wins(self, tmp_path):
         data_dir = str(tmp_path / "data")
-        _make_catalog_structure(
-            data_dir, [_valid_item("dup", title="From A")], filename="a.yaml"
-        )
-        _make_catalog_structure(
-            data_dir, [_valid_item("dup", title="From B")], filename="b.yaml"
-        )
+        _make_catalog_structure(data_dir, [_valid_item("dup", title="From A")], filename="a.yaml")
+        _make_catalog_structure(data_dir, [_valid_item("dup", title="From B")], filename="b.yaml")
         result = loader.discover_examples(data_dirs=[data_dir])
         assert len(result) == 1
         # b.yaml comes after a.yaml alphabetically, so "From B" should win
@@ -519,9 +513,7 @@ class TestMaterialize:
         server_root = str(tmp_path / "workspace")
         os.makedirs(server_root)
 
-        materializer.materialize(
-            "nested-sample", server_root=server_root, data_dirs=[data_dir]
-        )
+        materializer.materialize("nested-sample", server_root=server_root, data_dirs=[data_dir])
 
         dest = os.path.join(server_root, "kale-samples", "nested-sample")
         assert os.path.isdir(os.path.join(dest, "data", "train"))
@@ -657,9 +649,7 @@ class TestRPCEndpoints:
 
         # Recreate should remove marker
         with patch("jupyter_core.paths.jupyter_path", return_value=[data_dir]):
-            result = nb.load_example(
-                None, "my-sample", server_root=server_root, recreate=True
-            )
+            result = nb.load_example(None, "my-sample", server_root=server_root, recreate=True)
         assert "notebook_path" in result
         assert not os.path.isfile(marker), "marker should be gone after recreate"
 
