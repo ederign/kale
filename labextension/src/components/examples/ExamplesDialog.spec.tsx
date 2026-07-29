@@ -224,4 +224,206 @@ describe('ExamplesDialog', () => {
     fireEvent.click(screen.getByLabelText('close'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  describe('import flow', () => {
+    it('imports a new example, opens notebook, and closes dialog', async () => {
+      const onClose = jest.fn();
+      // First call: list_examples; second: check_sample_exists; third: load_example
+      mockedExecuteRpc
+        .mockResolvedValueOnce(sampleEntries)
+        .mockResolvedValueOnce({ exists: false })
+        .mockResolvedValueOnce({ notebook_path: '/home/jovyan/intro-ml.ipynb' });
+
+      render(
+        <ExamplesDialog
+          open={true}
+          onClose={onClose}
+          kernel={mockKernel}
+          docManager={mockDocManager}
+        />,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Intro to ML')).toBeTruthy();
+      });
+
+      fireEvent.click(screen.getByText('Intro to ML'));
+
+      await waitFor(() => {
+        expect(mockDocManager.openOrReveal).toHaveBeenCalledWith(
+          '/home/jovyan/intro-ml.ipynb',
+        );
+      });
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('shows ConflictDialog when sample already exists', async () => {
+      mockedExecuteRpc
+        .mockResolvedValueOnce(sampleEntries)
+        .mockResolvedValueOnce({ exists: true });
+
+      render(
+        <ExamplesDialog
+          open={true}
+          onClose={jest.fn()}
+          kernel={mockKernel}
+          docManager={mockDocManager}
+        />,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Intro to ML')).toBeTruthy();
+      });
+
+      fireEvent.click(screen.getByText('Intro to ML'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Sample Already Exists')).toBeTruthy();
+      });
+    });
+
+    it('shows error message when import fails', async () => {
+      mockedExecuteRpc
+        .mockResolvedValueOnce(sampleEntries)
+        .mockResolvedValueOnce({ exists: false })
+        .mockRejectedValueOnce(new Error('RPC connection lost'));
+
+      render(
+        <ExamplesDialog
+          open={true}
+          onClose={jest.fn()}
+          kernel={mockKernel}
+          docManager={mockDocManager}
+        />,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Intro to ML')).toBeTruthy();
+      });
+
+      fireEvent.click(screen.getByText('Intro to ML'));
+
+      await waitFor(() => {
+        expect(screen.getByText('RPC connection lost')).toBeTruthy();
+      });
+      // Loading should be cleared — card should be clickable again
+      expect(mockDocManager.openOrReveal).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('conflict resolution flow', () => {
+    async function renderAndTriggerConflict(onClose = jest.fn()) {
+      mockedExecuteRpc
+        .mockResolvedValueOnce(sampleEntries)
+        .mockResolvedValueOnce({ exists: true });
+
+      render(
+        <ExamplesDialog
+          open={true}
+          onClose={onClose}
+          kernel={mockKernel}
+          docManager={mockDocManager}
+        />,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Intro to ML')).toBeTruthy();
+      });
+
+      fireEvent.click(screen.getByText('Intro to ML'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Sample Already Exists')).toBeTruthy();
+      });
+    }
+
+    it('clears conflict state when Cancel is clicked', async () => {
+      await renderAndTriggerConflict();
+
+      fireEvent.click(screen.getByText('Cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByText('Sample Already Exists')).toBeNull();
+      });
+    });
+
+    it('opens existing notebook when Open Existing is clicked', async () => {
+      const onClose = jest.fn();
+
+      await renderAndTriggerConflict(onClose);
+
+      // Queue load_example response after conflict is triggered
+      mockedExecuteRpc.mockResolvedValueOnce({
+        notebook_path: '/home/jovyan/intro-ml.ipynb',
+      });
+
+      fireEvent.click(screen.getByText('Open Existing'));
+
+      await waitFor(() => {
+        expect(mockDocManager.openOrReveal).toHaveBeenCalledWith(
+          '/home/jovyan/intro-ml.ipynb',
+        );
+      });
+      expect(onClose).toHaveBeenCalled();
+      // Verify load_example was called without recreate
+      const loadCall = mockedExecuteRpc.mock.calls.find(
+        call => call[1] === 'nb.load_example',
+      );
+      expect(loadCall).toBeTruthy();
+      expect(loadCall![2]).not.toHaveProperty('recreate');
+    });
+
+    it('recreates notebook when Recreate is clicked', async () => {
+      const onClose = jest.fn();
+
+      await renderAndTriggerConflict(onClose);
+
+      // Queue load_example response after conflict is triggered
+      mockedExecuteRpc.mockResolvedValueOnce({
+        notebook_path: '/home/jovyan/intro-ml.ipynb',
+      });
+
+      fireEvent.click(screen.getByText('Recreate'));
+
+      await waitFor(() => {
+        expect(mockDocManager.openOrReveal).toHaveBeenCalledWith(
+          '/home/jovyan/intro-ml.ipynb',
+        );
+      });
+      expect(onClose).toHaveBeenCalled();
+      // Verify load_example was called with recreate: true
+      const loadCall = mockedExecuteRpc.mock.calls.find(
+        call => call[1] === 'nb.load_example' && call[2]?.recreate === true,
+      );
+      expect(loadCall).toBeTruthy();
+    });
+
+    it('shows error when Open Existing RPC fails', async () => {
+      await renderAndTriggerConflict();
+
+      mockedExecuteRpc.mockRejectedValueOnce(
+        new Error('Failed to open notebook'),
+      );
+
+      fireEvent.click(screen.getByText('Open Existing'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Failed to open notebook')).toBeTruthy();
+      });
+    });
+
+    it('shows error when Recreate RPC fails', async () => {
+      await renderAndTriggerConflict();
+
+      mockedExecuteRpc.mockRejectedValueOnce(
+        new Error('Failed to recreate notebook'),
+      );
+
+      fireEvent.click(screen.getByText('Recreate'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Failed to recreate notebook')).toBeTruthy();
+      });
+    });
+  });
 });

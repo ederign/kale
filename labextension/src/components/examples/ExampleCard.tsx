@@ -65,7 +65,7 @@ export const ExampleCard: React.FC<IExampleCardProps> = ({
                 size="small"
                 sx={{
                   backgroundColor: getDifficultyColor(example.difficulty),
-                  color: '#fff',
+                  color: 'var(--jp-ui-inverse-font-color0)',
                 }}
               />
             )}

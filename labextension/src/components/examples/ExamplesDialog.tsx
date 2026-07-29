@@ -74,8 +74,10 @@ export const ExamplesDialog: React.FC<IExamplesDialogProps> = ({
         setEntries(result);
         setLoading(false);
       })
-      .catch((err: Error) => {
-        setError(err.message || 'Failed to load examples catalog.');
+      .catch((err: unknown) => {
+        const message =
+          err instanceof Error ? err.message : 'Failed to load examples catalog.';
+        setError(message);
         setLoading(false);
       });
   }, [open, kernel]);
@@ -99,6 +101,9 @@ export const ExamplesDialog: React.FC<IExamplesDialogProps> = ({
   };
 
   const handleImport = async (example: IExampleEntry) => {
+    if (loadingId) {
+      return;
+    }
     setLoadingId(example.id);
     setError(null);
 
