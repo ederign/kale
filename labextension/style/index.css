@@ -730,3 +730,39 @@ a {
   text-decoration: underline;
   font-weight: 400;
 }
+
+/* Examples Card Styles */
+.kale-example-card-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kale-example-card-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: color-mix(
+    in srgb,
+    var(--jp-layout-color1) 70%,
+    transparent
+  );
+}
+
+/* Empty State Examples Link */
+.kale-empty-state-examples-link {
+  font-size: 13px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Examples Dialog Filter Row */
+.kale-examples-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}

@@ -268,7 +268,13 @@ export const KubeflowKaleLeftPanel: React.FC<IProps> = props => {
                 </div>
               </>
             )}
-            {!notebookMeta.isEnabled && <KaleEmptyState />}
+            {!notebookMeta.isEnabled && (
+              <KaleEmptyState
+                onOpenExamples={() =>
+                  lab.commands.execute('kale:open-examples')
+                }
+              />
+            )}
           </div>
 
           <div

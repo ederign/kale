@@ -63,6 +63,7 @@
     "@jupyterlab/application": "^4.5.6",
     "@jupyterlab/cells": "^4.5.6",
     "@jupyterlab/coreutils": "^6.5.6",
+    "@jupyterlab/launcher": "^4.5.6",
     "@jupyterlab/nbformat": "^4.5.6",
     "@jupyterlab/notebook": "^4.5.6",
     "@jupyterlab/settingregistry": "^4.5.6"
@@ -74,6 +75,9 @@
     "@jupyterlab/testutils": "^4.5.6",
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
+    "@testing-library/dom": "^10.0.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
     "@types/jest": "^29.2.0",
     "@types/js-yaml": "^4.0.9",
     "@types/json-schema": "^7.0.11",
