@@ -750,3 +750,11 @@ a {
   justify-content: center;
   background-color: rgba(255, 255, 255, 0.7);
 }
+
+/* Examples Dialog Filter Row */
+.kale-examples-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
