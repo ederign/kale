@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 
-export interface ConflictDialogProps {
+export interface IConflictDialogProps {
   open: boolean;
   sampleTitle: string;
   onCancel: () => void;
@@ -30,7 +30,7 @@ export interface ConflictDialogProps {
   onRecreate: () => void;
 }
 
-export const ConflictDialog: React.FC<ConflictDialogProps> = ({
+export const ConflictDialog: React.FC<IConflictDialogProps> = ({
   open,
   sampleTitle,
   onCancel,

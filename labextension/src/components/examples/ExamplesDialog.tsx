@@ -33,14 +33,14 @@ import { IExampleEntry } from './types';
 import { ExampleCard } from './ExampleCard';
 import { ConflictDialog } from './ConflictDialog';
 
-export interface ExamplesDialogProps {
+export interface IExamplesDialogProps {
   open: boolean;
   onClose: () => void;
   kernel: Kernel.IKernelConnection;
   docManager: IDocumentManager;
 }
 
-export const ExamplesDialog: React.FC<ExamplesDialogProps> = ({
+export const ExamplesDialog: React.FC<IExamplesDialogProps> = ({
   open,
   onClose,
   kernel,
@@ -103,11 +103,10 @@ export const ExamplesDialog: React.FC<ExamplesDialogProps> = ({
     setError(null);
 
     try {
-      const existsResult = await executeRpc(
-        kernel,
-        'nb.check_sample_exists',
-        { sample_id: example.id, server_root: serverRoot },
-      );
+      const existsResult = await executeRpc(kernel, 'nb.check_sample_exists', {
+        sample_id: example.id,
+        server_root: serverRoot,
+      });
 
       if (existsResult.exists) {
         setConflictExample(example);
@@ -190,11 +189,7 @@ export const ExamplesDialog: React.FC<ExamplesDialogProps> = ({
           }}
         >
           Kale Examples
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            size="small"
-          >
+          <IconButton aria-label="close" onClick={onClose} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>

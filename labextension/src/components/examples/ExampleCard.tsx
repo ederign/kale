@@ -24,15 +24,13 @@ import {
 } from '@mui/material';
 import { IExampleEntry } from './types';
 
-export interface ExampleCardProps {
+export interface IExampleCardProps {
   example: IExampleEntry;
   onImport: (example: IExampleEntry) => void;
   loading: boolean;
 }
 
-export const getDifficultyColor = (
-  difficulty: string | null,
-): string => {
+export const getDifficultyColor = (difficulty: string | null): string => {
   switch (difficulty) {
     case 'beginner':
       return 'var(--jp-success-color1)';
@@ -45,25 +43,19 @@ export const getDifficultyColor = (
   }
 };
 
-export const ExampleCard: React.FC<ExampleCardProps> = ({
+export const ExampleCard: React.FC<IExampleCardProps> = ({
   example,
   onImport,
   loading,
 }) => {
   return (
     <Card sx={{ position: 'relative' }}>
-      <CardActionArea
-        disabled={loading}
-        onClick={() => onImport(example)}
-      >
+      <CardActionArea disabled={loading} onClick={() => onImport(example)}>
         <CardContent>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {example.title}
           </Typography>
-          <Typography
-            variant="body2"
-            className="kale-example-card-description"
-          >
+          <Typography variant="body2" className="kale-example-card-description">
             {example.description}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>

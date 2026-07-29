@@ -13,7 +13,14 @@
 // limitations under the License.
 
 import * as React from 'react';
-import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+  within,
+} from '@testing-library/react';
 import { ExamplesDialog } from './ExamplesDialog';
 import { IExampleEntry } from './types';
 import { executeRpc } from '../../lib/RPCUtils';

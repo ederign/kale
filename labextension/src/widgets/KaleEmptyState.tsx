@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import * as React from 'react';
-import { Box } from '@mui/material';
+import { Box, Link } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
@@ -21,7 +21,13 @@ import CloudQueueIcon from '@mui/icons-material/CloudQueue';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { theme } from '../Theme';
 
-export const KaleEmptyState = () => {
+interface IKaleEmptyStateProps {
+  onOpenExamples?: () => void;
+}
+
+export const KaleEmptyState: React.FC<IKaleEmptyStateProps> = ({
+  onOpenExamples,
+}) => {
   return (
     <Box className="kale-empty-state-container">
       <Box
@@ -80,6 +86,18 @@ export const KaleEmptyState = () => {
           here
         </a>
       </p>
+      {onOpenExamples && (
+        <p className="kale-empty-state-examples-link">
+          <Link
+            component="button"
+            type="button"
+            underline="hover"
+            onClick={onOpenExamples}
+          >
+            Browse examples
+          </Link>
+        </p>
+      )}
     </Box>
   );
 };

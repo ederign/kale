@@ -25,6 +25,8 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { ILauncher } from '@jupyterlab/launcher';
+
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import { Token } from '@lumino/coreutils';
@@ -41,6 +43,7 @@ import { Kernel } from '@jupyterlab/services';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { registerKaleCommands } from './commands/kaleToolbar';
+import { registerExamplesCommand } from './commands/examplesCommand';
 
 /* tslint:disable */
 export const IKubeflowKale = new Token<IKubeflowKale>(
@@ -86,6 +89,7 @@ export default {
     IDocumentManager,
     ISettingRegistry,
   ],
+  optional: [ILauncher],
   provides: IKubeflowKale,
   autoStart: true,
 } as JupyterFrontEndPlugin<IKubeflowKale>;
@@ -97,6 +101,7 @@ async function activate(
   tracker: INotebookTracker,
   docManager: IDocumentManager,
   settingRegistry: ISettingRegistry,
+  launcher: ILauncher | null,
 ): Promise<IKubeflowKale> {
   const kernel: Kernel.IKernelConnection =
     await NotebookUtils.createNewKernel();
@@ -330,6 +335,7 @@ async function activate(
     loadPanel();
   });
   registerKaleCommands(lab, kaleIcon);
+  registerExamplesCommand(lab, kernel, docManager, kaleIcon, launcher);
 
   return {
     get widget() {
