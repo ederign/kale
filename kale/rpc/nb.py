@@ -20,7 +20,7 @@ from tabulate import tabulate
 
 from kale import Compiler, NotebookProcessor, marshal
 from kale.common import astutils, kfputils, kfutils, podutils
-from kale.rpc.errors import RPCInternalError, RPCUnhandledError
+from kale.rpc.errors import RPCInternalError, RPCNotFoundError, RPCUnhandledError
 from kale.rpc.log import create_adapter
 
 KALE_MARSHAL_DIR_POSTFIX = ".kale.marshal.dir"
@@ -254,3 +254,43 @@ def get_security_context_defaults(request):
 
     security_context = get_security_context_from_env()
     return security_context.to_dict()
+
+
+def list_examples(request):
+    """Discover and return all catalog examples."""
+    try:
+        from kale.examples_catalog import discover_examples
+
+        return discover_examples()
+    except Exception as e:
+        request.log.exception("Failed to discover examples: %s", e)
+        raise RPCInternalError(details=str(e), trans_id=request.trans_id)
+
+
+def check_sample_exists(request, sample_id, server_root=None):
+    """Check if a sample has been previously materialized."""
+    try:
+        from kale.examples_catalog import check_existing
+
+        return {"exists": check_existing(sample_id, server_root)}
+    except Exception as e:
+        request.log.exception("Failed to check sample existence: %s", e)
+        raise RPCInternalError(details=str(e), trans_id=request.trans_id)
+
+
+def load_example(request, sample_id, server_root=None, recreate=False):
+    """Materialize a sample and return the notebook path."""
+    try:
+        from kale.examples_catalog import materializer as mat
+
+        if recreate:
+            notebook_path = mat.recreate(sample_id, server_root)
+        else:
+            notebook_path = mat.materialize(sample_id, server_root)
+        return {"notebook_path": notebook_path}
+    except ValueError as e:
+        request.log.exception("Sample error for '%s': %s", sample_id, e)
+        raise RPCNotFoundError(details=str(e), trans_id=request.trans_id)
+    except Exception as e:
+        request.log.exception("Failed to load example '%s': %s", sample_id, e)
+        raise RPCInternalError(details=str(e), trans_id=request.trans_id)
