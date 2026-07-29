@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+import logging
 import os
 from unittest.mock import patch
 
@@ -155,7 +156,7 @@ class TestDiscoverExamples:
         # Wrong kind is silently skipped -- no warning should be logged
         assert not any("OtherKind" in r.message for r in caplog.records)
 
-    def test_unknown_api_version_skipped(self, tmp_path, capfd):
+    def test_unknown_api_version_skipped(self, tmp_path, caplog):
         data_dir = str(tmp_path / "data")
         catalog_dir = os.path.join(data_dir, "kale", "catalog")
         samples_dir = os.path.join(data_dir, "kale", "samples", "test-sample")
@@ -168,10 +169,19 @@ class TestDiscoverExamples:
         }
         with open(os.path.join(catalog_dir, "catalog.yaml"), "w") as f:
             yaml.dump(doc, f)
-        result = loader.discover_examples(data_dirs=[data_dir])
+        # The kale logger has propagate=False (set by logutils.get_or_create_logger),
+        # so caplog's root-level handler never sees records. Temporarily enable
+        # propagation so caplog can capture the warning.
+        kale_logger = logging.getLogger("kale")
+        orig_propagate = kale_logger.propagate
+        kale_logger.propagate = True
+        try:
+            with caplog.at_level(logging.WARNING, logger="kale.examples_catalog.loader"):
+                result = loader.discover_examples(data_dirs=[data_dir])
+        finally:
+            kale_logger.propagate = orig_propagate
         assert result == []
-        captured = capfd.readouterr()
-        assert "unknown apiVersion" in captured.err
+        assert any("unknown apiVersion" in r.message for r in caplog.records)
 
     def test_yml_extension_discovered(self, tmp_path):
         data_dir = str(tmp_path / "data")
